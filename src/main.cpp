@@ -308,9 +308,10 @@ int main(int argc, char* argv[])
     LoadShadersFromFiles();
 
     // Carregamos duas imagens para serem utilizadas como textura
-    LoadTextureImage("../../data/textures/ceu.jpg");       // TextureImage0
+    LoadTextureImage("../../data/textures/skybox.jpg");       // TextureImage0
     LoadTextureImage("../../data/tc-earth_daymap_surface.jpg");  // TextureImage1
-    LoadTextureImage("../../data/textures/grama.jpg");       // TextureImage2
+    LoadTextureImage("../../data/textures/campo.jpeg");       // TextureImage2
+    LoadTextureImage("../../data/textures/ceu.jpg");       // TextureImage0
 
 
 
@@ -319,7 +320,7 @@ int main(int argc, char* argv[])
     ComputeNormals(&spheremodel);
     BuildTrianglesAndAddToVirtualScene(&spheremodel);
 
-    ObjModel bunnymodel("../../data/bunny.obj");
+    ObjModel bunnymodel("../../data/player/player.obj");
     ComputeNormals(&bunnymodel);
     BuildTrianglesAndAddToVirtualScene(&bunnymodel);
 
@@ -515,7 +516,12 @@ int main(int argc, char* argv[])
         }
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, BUNNY);
-        DrawVirtualObject("the_bunny");
+        DrawVirtualObject("Object__Soccer_ballWhit_0");
+        DrawVirtualObject("Object__Soccer_ballWhit_1");
+        DrawVirtualObject("Object__Soccer_ballBlac_2");
+        DrawVirtualObject("Object__Soccer_ballBlac_3");
+        DrawVirtualObject("Object_Sport_Sum_Man_Rt_4");
+        DrawVirtualObject("Object_Sport_Sum_Man_Rt_5");
 
         // Desenhamos o plano do chão
         model = Matrix_Translate(0.0f,-1.1f,0.0f)

@@ -35,6 +35,7 @@ uniform vec4 bbox_max;
 uniform sampler2D TextureImage0;
 uniform sampler2D TextureImage1;
 uniform sampler2D TextureImage2;
+uniform sampler2D TextureImage3;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
@@ -124,7 +125,7 @@ void main()
         // PREENCHA AQUI as coordenadas de textura do coelho, computadas com
         // projeção planar XY em COORDENADAS DO MODELO. Utilize como referência
         // o slides 99-104 do documento Aula_20_Mapeamento_de_Texturas.pdf,
-        // e também use as variáveis min*/max* definidas abaixo para normalizar
+        // e também use as variáveis min max definidas abaixo para normalizar
         // as coordenadas de textura U e V dentro do intervalo [0,1]. Para
         // tanto, veja por exemplo o mapeamento da variável 'p_v' utilizando
         // 'h' no slides 158-160 do documento Aula_20_Mapeamento_de_Texturas.pdf.
@@ -149,7 +150,8 @@ void main()
         U = X;
         V = Y;
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
-        Kd0 = texture(TextureImage0, vec2(U,V)).rgb;
+        Kd0 = texture(TextureImage3, vec2(U,V)).rgb;
+
 
     }
     else if ( object_id == PLANE )
