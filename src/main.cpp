@@ -390,6 +390,11 @@ int main(int argc, char* argv[])
         z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
         x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
 
+        // Atualiza delta de tempo
+        float current_time = (float)glfwGetTime();
+        float delta_t = current_time - prev_time;
+        prev_time = current_time;
+
         // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
         // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
 
@@ -400,11 +405,9 @@ int main(int argc, char* argv[])
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f); // Vetor "up" fixado para apontar para o "céu" (eito Y global)
         }
         else{
+            camera_position_c = last_cam_pos;
             camera_view_vector = glm::vec4(x,y,z,0.0f); // Vetor "view", sentido para onde a câmera está virada
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f); // Vetor "up" fixado para apontar para o "céu" (eito Y global)
-
-
-            camera_view_vector =  glm::vec4(x,y,z,0.0f); // Vetor "view", sentido para onde a câmera está virada
 
             glm::vec4 w = -camera_view_vector/* PREENCHA AQUI o cálculo do vetor w */;
             glm::vec4 u = crossproduct(camera_up_vector, w)/* PREENCHA AQUI o cálculo do vetor u */;
@@ -412,10 +415,6 @@ int main(int argc, char* argv[])
             // Normalizamos os vetores u e w
             w = w / norm(w);
             u = u / norm(u);
-
-            float current_time = (float)glfwGetTime();
-            float delta_t = current_time - prev_time;
-            prev_time = current_time;
 
             // *** MOVIMENTACAO ***
             if (tecla_W_pressionada){
