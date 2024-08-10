@@ -309,7 +309,7 @@ int main(int argc, char* argv[])
 
     // Carregamos duas imagens para serem utilizadas como textura
     LoadTextureImage("../../data/textures/skybox.jpg");       // TextureImage0
-    LoadTextureImage("../../data/textures/bola.png");                // TextureImage1
+    LoadTextureImage("../../data/textures/bola.jpg");                // TextureImage1
     LoadTextureImage("../../data/textures/campo.jpeg");       // TextureImage2
     LoadTextureImage("../../data/textures/ceu.jpg");       // TextureImage3
 
