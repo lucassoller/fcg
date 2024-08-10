@@ -309,9 +309,9 @@ int main(int argc, char* argv[])
 
     // Carregamos duas imagens para serem utilizadas como textura
     LoadTextureImage("../../data/textures/skybox.jpg");       // TextureImage0
-    LoadTextureImage("../../data/tc-earth_daymap_surface.jpg");  // TextureImage1
+    LoadTextureImage("../../data/textures/bola.png");                // TextureImage1
     LoadTextureImage("../../data/textures/campo.jpeg");       // TextureImage2
-    LoadTextureImage("../../data/textures/ceu.jpg");       // TextureImage0
+    LoadTextureImage("../../data/textures/ceu.jpg");       // TextureImage3
 
 
 
@@ -506,8 +506,8 @@ int main(int argc, char* argv[])
 
         // Desenhamos o modelo do coelho
         if(!tecla_V){
-            model = Matrix_Translate(camera_position_c.x+1,camera_position_c.y-0.8,camera_position_c.z+0.3) *
-            Matrix_Translate(-camera_view_vector.x, 0, -camera_view_vector.z);
+            model = Matrix_Translate(camera_position_c.x+1,camera_position_c.y-0.8,camera_position_c.z+0.3)
+            *   Matrix_Translate(-camera_view_vector.x, 0, -camera_view_vector.z);
 
             last_cam_pos = camera_position_c;
         } else{
@@ -515,12 +515,12 @@ int main(int argc, char* argv[])
         }
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, BUNNY);
-        DrawVirtualObject("Object__Soccer_ballWhit_0");
-        DrawVirtualObject("Object__Soccer_ballWhit_1");
-        DrawVirtualObject("Object__Soccer_ballBlac_2");
-        DrawVirtualObject("Object__Soccer_ballBlac_3");
-        DrawVirtualObject("Object_Sport_Sum_Man_Rt_4");
-        DrawVirtualObject("Object_Sport_Sum_Man_Rt_5");
+        //DrawVirtualObject("Object__Soccer_ballWhit_0");
+        //DrawVirtualObject("Object__Soccer_ballWhit_1");
+        //DrawVirtualObject("Object__Soccer_ballBlac_2");
+        //DrawVirtualObject("Object__Soccer_ballBlac_3");
+        //DrawVirtualObject("Object_Sport_Sum_Man_Rt_4");
+        //DrawVirtualObject("Object_Sport_Sum_Man_Rt_5");
 
         // Desenhamos o plano do chão
         model = Matrix_Translate(0.0f,-1.1f,0.0f)
@@ -697,6 +697,7 @@ void LoadShadersFromFiles()
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage0"), 0);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage1"), 1);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage2"), 2);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage3"), 3);
     glUseProgram(0);
 }
 

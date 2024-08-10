@@ -100,24 +100,16 @@ void main()
 
         vec4 bbox_center = (bbox_min + bbox_max) / 2.0;
 
-        vec4 p_l = bbox_center + 11* ((position_model - bbox_center)/(length(position_model - bbox_center)));
-        vec4 p_v = p_l - bbox_center;
+        p = position_model - bbox_center;
 
-
-        float theta = atan(p_v.x, p_v.z) + epsilon;
-        float phi = asin(p_v.y/11) + epsilon;;
-
-        Ks = vec3(0.0,0.0,0.0);
-        Ka = Kd0 / 2.0f;
-        q = 1.0;
-
+        float ro = length(p);
+        float theta = atan(p.x, p.z);
+        float phi = asin(p.y/ro);
 
         U = (theta + M_PI)/(2*M_PI);
         V = (phi + (M_PI_2))/(M_PI);
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage1
         Kd0 = texture(TextureImage1, vec2(U,V)).rgb;
-
-
 
     }
     else if ( object_id == BUNNY )
@@ -143,9 +135,10 @@ void main()
         float X = (position_model.x - bbox_min.x)/(bbox_max.x - bbox_min.x);
         float Y = (position_model.y - bbox_min.y)/(bbox_max.y - bbox_min.y);
 
-        Ks = vec3(0.3,0.3,0.3);
-        Ka = vec3(0.0,0.0,0.0);
-        q = 20.0;
+        Kd = vec3(0.08, 0.4, 0.8);
+        Ks = vec3(0.8,0.8,0.8);
+        Ka = vec3(0.04,0.2,0.4);
+        q = 32.0;
 
         U = X;
         V = Y;
