@@ -317,6 +317,7 @@ int main(int argc, char* argv[])
     LoadTextureImage("../../data/textures/field.jpeg");     // TextureImage2
     LoadTextureImage("../../data/textures/chao.jpg");       // TextureImage3
     LoadTextureImage("../../data/textures/player.jpg");     // TextureImage4
+    LoadTextureImage("../../data/textures/cone.jpg");       // TextureImage5
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/3d/sphere.obj");
@@ -334,6 +335,10 @@ int main(int argc, char* argv[])
     ObjModel planemodel("../../data/3d/plane.obj");
     ComputeNormals(&planemodel);
     BuildTrianglesAndAddToVirtualScene(&planemodel);
+
+    ObjModel conemodel("../../data/3d/cone.obj");
+    ComputeNormals(&conemodel);
+    BuildTrianglesAndAddToVirtualScene(&conemodel);
 
     if ( argc > 1 )
     {
@@ -508,6 +513,7 @@ int main(int argc, char* argv[])
         #define FIELD  2
         #define SKYSPHERE 3
         #define PLANE  4
+        #define CONE  5
 
         // Desenha Infinito
         model = Matrix_Translate(camera_position_c.x,camera_position_c.y,camera_position_c.z);
@@ -528,7 +534,6 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, SPHERE);
         DrawVirtualObject("the_sphere");
-
 
         // Desenhamos o modelo do jogador
         if(!tecla_V){
@@ -561,6 +566,13 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, PLANE);
         DrawVirtualObject("the_plane");
+
+        // Desenhamos o modelo do cone
+        model = Matrix_Translate(2.0f,0.0f,2.0f);
+        // MUDAR MATRIX SCALE
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, CONE);
+        DrawVirtualObject("Object_street_cones1_texture_dirt1.jpg");
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
         // terceiro cubo.
@@ -730,6 +742,7 @@ void LoadShadersFromFiles()
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage2"), 2);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage3"), 3);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage4"), 4);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage5"), 5);
     glUseProgram(0);
 }
 
