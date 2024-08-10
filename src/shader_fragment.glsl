@@ -22,9 +22,11 @@ uniform mat4 projection;
 
 // Identificador que define qual objeto está sendo desenhado no momento
 #define SPHERE 0
-#define BUNNY  1
-#define PLANE  2
+#define PLAYER 1
+#define FIELD  2
 #define SKYSPHERE 3
+#define PLANE 4
+
 uniform int object_id;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
@@ -113,7 +115,7 @@ void main()
         Kd0 = texture(TextureImage1, vec2(U,V)).rgb;
 
     }
-    else if ( object_id == BUNNY )
+    else if ( object_id == PLAYER )
     {
         // PREENCHA AQUI as coordenadas de textura do coelho, computadas com
         // projeção planar XY em COORDENADAS DO MODELO. Utilize como referência
@@ -130,20 +132,31 @@ void main()
 
         U = texcoords.x;
         V = texcoords.y;
-        // Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+        // Obtemos a refletância difusa a partir da leitura da imagem TextureImage4
         Kd0 = texture(TextureImage4, vec2(U,V)).rgb;
 
     }
-    else if ( object_id == PLANE )
+    else if ( object_id == FIELD )
     {
         // Coordenadas de textura do plano, obtidas do arquivo OBJ.
-        U = texcoords.x *100;
-        V = texcoords.y * 100;
+        U = texcoords.x;
+        V = texcoords.y;
         // Kd = vec3(0.2,0.2,0.2);
         Ks = vec3(0.3,0.3,0.3);
         Ka = vec3(0.0,0.0,0.0);
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage2
         Kd0 = texture(TextureImage2, vec2(U,V)).rgb;
+    }
+    else if ( object_id == PLANE )
+    {
+        // Coordenadas de textura do plano, obtidas do arquivo OBJ.
+        U = texcoords.x * 30;
+        V = texcoords.y * 30;
+        // Kd = vec3(0.2,0.2,0.2);
+        Ks = vec3(0.3,0.3,0.3);
+        Ka = vec3(0.0,0.0,0.0);
+        // Obtemos a refletância difusa a partir da leitura da imagem TextureImage3
+        Kd0 = texture(TextureImage3, vec2(U,V)).rgb;
     }
     else if ( object_id == SKYSPHERE )
     {

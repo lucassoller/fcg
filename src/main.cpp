@@ -5,7 +5,11 @@
 //    INF01047 Fundamentos de Computação Gráfica
 //               Prof. Eduardo Gastal
 //
-//                   LABORATÓRIO 5
+//                   TRABALHO FINAL
+//                      FUTEBOL
+//
+//          Arthur Calazans de Camargo - 343608
+//           Lucas Soller da Silva - 333052
 //
 
 // Arquivos "headers" padrões de C podem ser incluídos em um
@@ -308,22 +312,24 @@ int main(int argc, char* argv[])
     LoadShadersFromFiles();
 
     // Carregamos duas imagens para serem utilizadas como textura
-    LoadTextureImage("../../data/textures/skybox.jpg");       // TextureImage0
-    LoadTextureImage("../../data/textures/bola.jpg");                // TextureImage1
-    LoadTextureImage("../../data/textures/campo.jpeg");       // TextureImage2
-    LoadTextureImage("../../data/textures/ceu.jpg");       // TextureImage3
-    LoadTextureImage("../../data/player/Tex_1.jpg");       // TextureImage4
-
-
+    LoadTextureImage("../../data/textures/skybox.jpg");     // TextureImage0
+    LoadTextureImage("../../data/textures/bola.jpg");       // TextureImage1
+    LoadTextureImage("../../data/textures/field.jpeg");     // TextureImage2
+    LoadTextureImage("../../data/textures/chao.jpg");       // TextureImage3
+    LoadTextureImage("../../data/player/Tex_1.jpg");        // TextureImage4
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
     ComputeNormals(&spheremodel);
     BuildTrianglesAndAddToVirtualScene(&spheremodel);
 
-    ObjModel bunnymodel("../../data/player/player.obj");
-    ComputeNormals(&bunnymodel);
-    BuildTrianglesAndAddToVirtualScene(&bunnymodel);
+    ObjModel playermodel("../../data/player/player.obj");
+    ComputeNormals(&playermodel);
+    BuildTrianglesAndAddToVirtualScene(&playermodel);
+
+    ObjModel fieldmodel("../../data/field.obj");
+    ComputeNormals(&fieldmodel);
+    BuildTrianglesAndAddToVirtualScene(&fieldmodel);
 
     ObjModel planemodel("../../data/plane.obj");
     ComputeNormals(&planemodel);
@@ -396,6 +402,10 @@ int main(int argc, char* argv[])
         float delta_t = current_time - prev_time;
         prev_time = current_time;
 
+        // Defina os limites para a câmera
+        float minX = -20.0f, maxX = 20.0f;
+        float minZ = -20.0f, maxZ = 20.0f;
+
         // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
         // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
 
@@ -418,21 +428,37 @@ int main(int argc, char* argv[])
             u = u / norm(u);
 
             // *** MOVIMENTACAO ***
-            if (tecla_W_pressionada){
-                camera_position_c.x -= w.x * speed * delta_t;
-                camera_position_c.z -= w.z * speed * delta_t;
+                        if (tecla_W_pressionada) {
+                float new_x = camera_position_c.x - w.x * speed * delta_t;
+                float new_z = camera_position_c.z - w.z * speed * delta_t;
+               // if (new_x >= minX && new_x <= maxX && new_z >= minZ && new_z <= maxZ) {
+                    camera_position_c.x = new_x;
+                    camera_position_c.z = new_z;
+               // }
             }
-            if (tecla_A_pressionada){
-                camera_position_c.x -= u.x * speed * delta_t;
-                camera_position_c.z -= u.z * speed * delta_t;
+            if (tecla_A_pressionada) {
+                float new_x = camera_position_c.x - u.x * speed * delta_t;
+                float new_z = camera_position_c.z - u.z * speed * delta_t;
+               // if (new_x >= minX && new_x <= maxX && new_z >= minZ && new_z <= maxZ) {
+                    camera_position_c.x = new_x;
+                    camera_position_c.z = new_z;
+                //}
             }
-            if (tecla_S_pressionada){
-                camera_position_c.x += w.x * speed * delta_t;
-                camera_position_c.z += w.z * speed * delta_t;
+            if (tecla_S_pressionada) {
+                float new_x = camera_position_c.x + w.x * speed * delta_t;
+                float new_z = camera_position_c.z + w.z * speed * delta_t;
+               // if (new_x >= minX && new_x <= maxX && new_z >= minZ && new_z <= maxZ) {
+                    camera_position_c.x = new_x;
+                    camera_position_c.z = new_z;
+                //}
             }
-            if (tecla_D_pressionada){
-                camera_position_c.x += u.x * speed * delta_t;
-                camera_position_c.z += u.z * speed * delta_t;
+            if (tecla_D_pressionada) {
+                float new_x = camera_position_c.x + u.x * speed * delta_t;
+                float new_z = camera_position_c.z + u.z * speed * delta_t;
+               // if (new_x >= minX && new_x <= maxX && new_z >= minZ && new_z <= maxZ) {
+                    camera_position_c.x = new_x;
+                    camera_position_c.z = new_z;
+               // }
             }
         }
         // Computamos a matriz "View" utilizando os parâmetros da câmera para
@@ -478,16 +504,15 @@ int main(int argc, char* argv[])
 
         // Desenhamos os objetos da cena virtual
         #define SPHERE 0
-        #define BUNNY  1
-        #define PLANE  2
+        #define PLAYER  1
+        #define FIELD  2
         #define SKYSPHERE 3
+        #define PLANE  4
 
         // Desenha Infinito
-        model = Matrix_Translate(camera_position_c.x,camera_position_c.y,camera_position_c.z)
-              * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.01f);
+        model = Matrix_Translate(camera_position_c.x,camera_position_c.y,camera_position_c.z);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, SKYSPHERE);
-
 
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
@@ -505,7 +530,7 @@ int main(int argc, char* argv[])
         DrawVirtualObject("the_sphere");
 
 
-        // Desenhamos o modelo do coelho
+        // Desenhamos o modelo do jogador
         if(!tecla_V){
             model = Matrix_Translate(camera_position_c.x+1,camera_position_c.y-0.8,camera_position_c.z+0.3)
             *   Matrix_Translate(-camera_view_vector.x, 0, -camera_view_vector.z);
@@ -515,7 +540,7 @@ int main(int argc, char* argv[])
             model = Matrix_Translate(last_cam_pos.x,last_cam_pos.y,last_cam_pos.z);
         }
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, BUNNY);
+        glUniform1i(g_object_id_uniform, PLAYER);
         DrawVirtualObject("Object__Soccer_ballWhit_0");
         DrawVirtualObject("Object__Soccer_ballWhit_1");
         DrawVirtualObject("Object__Soccer_ballBlac_2");
@@ -523,14 +548,19 @@ int main(int argc, char* argv[])
         DrawVirtualObject("Object_Sport_Sum_Man_Rt_4");
         DrawVirtualObject("Object_Sport_Sum_Man_Rt_5");
 
-        // Desenhamos o plano do chão
-        model = Matrix_Translate(0.0f,-1.1f,0.0f)
-                * Matrix_Scale(100.0f,0.001f,100.0f);
+        // Desenhamos o plano do campo
+        model = Matrix_Translate(0.0f,-1.5f,0.0f)
+                * Matrix_Scale(0.01f,0.01f,0.01f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, FIELD);
+        DrawVirtualObject("field");
+
+        //Desenhamos o plano do chão
+        model = Matrix_Translate(0.0f,-7.0f,0.0f)
+                * Matrix_Scale(60.0f,1.0f,60.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, PLANE);
         DrawVirtualObject("the_plane");
-
-
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
         // terceiro cubo.
@@ -835,8 +865,7 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel* model)
                 bbox_max.y = std::max(bbox_max.y, vy);
                 bbox_max.z = std::max(bbox_max.z, vz);
 
-                // Inspecionando o código da tinyobjloader, o aluno Bernardo
-                // Sulzbach (2017/1) apontou que a maneira correta de testar se
+                // Inspecionando o código da tinyobjloader, maneira correta de testar se
                 // existem normais e coordenadas de textura no ObjModel é
                 // comparando se o índice retornado é -1. Fazemos isso abaixo.
 
@@ -1237,8 +1266,7 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
     // Uma câmera look-at nunca pode estar exatamente "em cima" do ponto para
     // onde ela está olhando, pois isto gera problemas de divisão por zero na
     // definição do sistema de coordenadas da câmera. Isto é, a variável abaixo
-    // nunca pode ser zero. Versões anteriores deste código possuíam este bug,
-    // o qual foi detectado pelo aluno Vinicius Fraga (2017/2).
+    // nunca pode ser zero.
     const float verysmallnumber = std::numeric_limits<float>::epsilon();
     if (g_CameraDistance < verysmallnumber)
         g_CameraDistance = verysmallnumber;
