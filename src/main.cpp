@@ -316,22 +316,22 @@ int main(int argc, char* argv[])
     LoadTextureImage("../../data/textures/bola.jpg");       // TextureImage1
     LoadTextureImage("../../data/textures/field.jpeg");     // TextureImage2
     LoadTextureImage("../../data/textures/chao.jpg");       // TextureImage3
-    LoadTextureImage("../../data/player/Tex_1.jpg");        // TextureImage4
+    LoadTextureImage("../../data/textures/player.jpg");     // TextureImage4
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
-    ObjModel spheremodel("../../data/sphere.obj");
+    ObjModel spheremodel("../../data/3d/sphere.obj");
     ComputeNormals(&spheremodel);
     BuildTrianglesAndAddToVirtualScene(&spheremodel);
 
-    ObjModel playermodel("../../data/player/player.obj");
+    ObjModel playermodel("../../data/3d/player.obj");
     ComputeNormals(&playermodel);
     BuildTrianglesAndAddToVirtualScene(&playermodel);
 
-    ObjModel fieldmodel("../../data/field.obj");
+    ObjModel fieldmodel("../../data/3d/field.obj");
     ComputeNormals(&fieldmodel);
     BuildTrianglesAndAddToVirtualScene(&fieldmodel);
 
-    ObjModel planemodel("../../data/plane.obj");
+    ObjModel planemodel("../../data/3d/plane.obj");
     ComputeNormals(&planemodel);
     BuildTrianglesAndAddToVirtualScene(&planemodel);
 
