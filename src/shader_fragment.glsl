@@ -28,6 +28,9 @@ uniform mat4 projection;
 #define PLANE 4
 #define CONE 5
 #define GOAL 6
+#define GOAL2  7
+#define GOAL3  8
+#define GOAL4  9
 
 uniform int object_id;
 
@@ -172,7 +175,7 @@ void main()
         V = texcoords.y;
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage5
         Kd0 = texture(TextureImage5, vec2(U,V)).rgb;
-    }else if ( object_id == GOAL )
+    }else if ( object_id == GOAL || object_id == GOAL2 || object_id == GOAL3 || object_id == GOAL4)
     {
         Ks = vec3(0.3,0.3,0.3);
         Ka = vec3(0.0,0.0,0.0);

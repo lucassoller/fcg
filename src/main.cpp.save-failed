@@ -237,18 +237,11 @@ GLuint g_NumLoadedTextures = 0;
 
 #define M_PI   3.14159265358979323846
 
-// valores e coordenadas iniciais dos adversarios
-bool mov = true;
+bool dir = true;
 float zgoal = 0.0f;
-
-bool mov2 = true;
+bool dir2 = true;
 float xgoal2 = 27.5f;
 float yrotate2 = M_PI;
-
-bool mov3 = true;
-float xgoal3 = 88.8f;
-float zgoal3 = 25.8;
-float yrotate3 = -M_PI / 4;
 
 int main(int argc, char* argv[])
 {
@@ -601,21 +594,20 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, CONE);
         DrawVirtualObject("Object_street_cones1_texture_dirt1.jpg");
 
-        //condicional que movimenta o adversario
-        if(mov)
+        //condicional que determina se o goleiro se move para a direita ou esquerda
+        if(dir)
         {
             zgoal += 0.05f;
             if(zgoal >= 3.0f){
-                mov = false;
+                dir = false;
             }
         }else{
             zgoal -= 0.05f;
             if(zgoal <= -3.0f){
-                mov = true;
+                dir = true;
             }
         }
         // Desenhamos o modelo do goleiro
-        // x = 11.7, y = 1.05, z = -3 -> 3
         model = Matrix_Translate(11.7f,1.05f,zgoal)
             * Matrix_Rotate_Y(M_PI)
             * Matrix_Scale(0.9f, 0.9f, 0.9f);
@@ -624,56 +616,29 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, GOAL);
         DrawVirtualObject("Object_TexMap_0");
 
-        //condicional que movimenta o adversario2
-        if(mov2)
+        //condicional que determina se o goleiro se move para a direita ou esquerda
+        if(dir2)
         {
             xgoal2 += 0.08f;
             if(xgoal2 >= 50.0f){
                 yrotate2 = M_PI * 2;
-                mov2 = false;
+                dir2 = false;
             }
         }else{
             xgoal2 -= 0.08f;
             if(xgoal2 <= 27.0f){
                 yrotate2 = M_PI;
-                mov2 = true;
+                dir2 = true;
             }
         }
-        // Desenhamos o modelo do adversario3
-        // x = 27 -> 50, y = 1.05, z = 10
+        // Desenhamos o modelo do goleiro2
         model = Matrix_Translate(xgoal2,1.05f,10.0f)
             * Matrix_Rotate_Y(yrotate2)
             * Matrix_Scale(0.9f, 0.9f, 0.9f);
 
+
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, GOAL2);
-        DrawVirtualObject("Object_TexMap_0");
-
-        //condicional que movimenta o adversario3
-        if(mov3)
-        {
-            xgoal3 -= 0.08f;
-            zgoal3 -= 0.08f;
-            if(xgoal3 <= 37.0f){
-                yrotate3 = 3 * M_PI / 4;
-                mov3 = false;
-            }
-        }else{
-            xgoal3 += 0.08f;
-            zgoal3 += 0.08f;
-            if(xgoal3 >= 88.7f){
-                yrotate3 = -M_PI / 4;
-                mov3 = true;
-            }
-        }
-        // Desenhamos o modelo do goleiro3
-        // x = 27 -> 88.7, y = 1.05, z = 25.8
-        model = Matrix_Translate(xgoal3,1.05f,zgoal3)
-            * Matrix_Rotate_Y(yrotate3)
-            * Matrix_Scale(0.9f, 0.9f, 0.9f);
-
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, GOAL3);
         DrawVirtualObject("Object_TexMap_0");
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
