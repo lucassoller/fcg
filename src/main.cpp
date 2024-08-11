@@ -313,7 +313,7 @@ int main(int argc, char* argv[])
 
     // Carregamos duas imagens para serem utilizadas como textura
     LoadTextureImage("../../data/textures/skybox.jpg");     // TextureImage0
-    LoadTextureImage("../../data/textures/bola2.jpg");      // TextureImage1
+    LoadTextureImage("../../data/textures/bola2.jpg");       // TextureImage1
     LoadTextureImage("../../data/textures/field.jpeg");     // TextureImage2
     LoadTextureImage("../../data/textures/chao.jpg");       // TextureImage3
     LoadTextureImage("../../data/textures/player.jpg");     // TextureImage4
@@ -363,7 +363,7 @@ int main(int argc, char* argv[])
     float x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
 
     glm::vec4 camera_position_c  = glm::vec4(3,3,3 ,1.0f);
-    float speed = 2.5f; // Velocidade da câmera
+    float speed = 8.5f; // Velocidade da câmera
     float prev_time = (float)glfwGetTime();
 
     camera_position_c  = glm::vec4(x,y,z,1.0f); // Ponto "c", centro da câmera
@@ -514,7 +514,6 @@ int main(int argc, char* argv[])
         #define SKYSPHERE 3
         #define PLANE  4
         #define CONE  5
-        #define BOLA  6
 
         // Desenha Infinito
         model = Matrix_Translate(camera_position_c.x,camera_position_c.y,camera_position_c.z);
@@ -529,9 +528,7 @@ int main(int argc, char* argv[])
 
         // Desenhamos o modelo da esfera
         model = Matrix_Translate(-1.0f,0.0f,0.0f)
-              * Matrix_Rotate_Z(0.6f)
-              * Matrix_Rotate_X(0.2f)
-              * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
+              * Matrix_Rotate_X(g_AngleY + (float)glfwGetTime() * 0.1f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, SPHERE);
         DrawVirtualObject("Object__Soccer_ballWhit_0");
@@ -565,8 +562,8 @@ int main(int argc, char* argv[])
         DrawVirtualObject("field");
 
         //Desenhamos o plano do chão
-        model = Matrix_Translate(0.0f,-7.0f,0.0f)
-                * Matrix_Scale(60.0f,1.0f,60.0f);
+        model = Matrix_Translate(25.0f,-6.2f,0.0f)
+                * Matrix_Scale(50.0f,1.0f,50.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, PLANE);
         DrawVirtualObject("the_plane");
