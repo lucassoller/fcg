@@ -27,6 +27,7 @@ uniform mat4 projection;
 #define SKYSPHERE 3
 #define PLANE 4
 #define CONE 5
+#define GOAL 6
 
 uniform int object_id;
 
@@ -170,6 +171,16 @@ void main()
         V = texcoords.y;
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage5
         Kd0 = texture(TextureImage5, vec2(U,V)).rgb;
+    }else if ( object_id == GOAL )
+    {
+        Ks = vec3(0.3,0.3,0.3);
+        Ka = vec3(0.0,0.0,0.0);
+        q = 20.0;
+
+        U = texcoords.x;
+        V = texcoords.y;
+        // Obtemos a refletância difusa a partir da leitura da imagem TextureImage5
+        Kd0 = texture(TextureImage6, vec2(U,V)).rgb;
     }
     else if ( object_id == SKYSPHERE )
     {

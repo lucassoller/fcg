@@ -235,6 +235,11 @@ GLint g_bbox_max_uniform;
 // Número de texturas carregadas pela função LoadTextureImage()
 GLuint g_NumLoadedTextures = 0;
 
+#define M_PI   3.14159265358979323846
+
+bool dir = false;
+float zgoal = 0.0f;
+
 int main(int argc, char* argv[])
 {
     // Inicializamos a biblioteca GLFW, utilizada para criar uma janela do
@@ -313,11 +318,12 @@ int main(int argc, char* argv[])
 
     // Carregamos duas imagens para serem utilizadas como textura
     LoadTextureImage("../../data/textures/skybox.jpg");     // TextureImage0
-    LoadTextureImage("../../data/textures/bola2.jpg");       // TextureImage1
+    LoadTextureImage("../../data/textures/bola2.jpg");      // TextureImage1
     LoadTextureImage("../../data/textures/field.jpeg");     // TextureImage2
     LoadTextureImage("../../data/textures/chao.jpg");       // TextureImage3
     LoadTextureImage("../../data/textures/player.jpg");     // TextureImage4
     LoadTextureImage("../../data/textures/cone.jpg");       // TextureImage5
+    LoadTextureImage("../../data/textures/goal.jpg");       // TextureImage6
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/3d/sphere.obj");
@@ -339,6 +345,10 @@ int main(int argc, char* argv[])
     ObjModel conemodel("../../data/3d/cone.obj");
     ComputeNormals(&conemodel);
     BuildTrianglesAndAddToVirtualScene(&conemodel);
+
+    ObjModel goalmodel("../../data/3d/goal.obj");
+    ComputeNormals(&goalmodel);
+    BuildTrianglesAndAddToVirtualScene(&goalmodel);
 
     if ( argc > 1 )
     {
@@ -514,6 +524,7 @@ int main(int argc, char* argv[])
         #define SKYSPHERE 3
         #define PLANE  4
         #define CONE  5
+        #define GOAL  6
 
         // Desenha Infinito
         model = Matrix_Translate(camera_position_c.x,camera_position_c.y,camera_position_c.z);
@@ -527,9 +538,10 @@ int main(int argc, char* argv[])
         glEnable(GL_DEPTH_TEST);
 
         // Desenhamos o modelo da esfera
-        model = Matrix_Translate(23.65f,-0.25f,0.4f)
+        model = Matrix_Translate(23.65f -(float)glfwGetTime() * 0.2f,-0.25f,0.4f)
+            //* Matrix_Rotate_X((float)glfwGetTime() * 0.2f)
             * Matrix_Scale(1.5f, 1.5f, 1.5f);
-              //* Matrix_Rotate_Z(g_AngleZ + (float)glfwGetTime() * 0.1f);
+
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, SPHERE);
         DrawVirtualObject("Object__Soccer_ballWhit_0");
@@ -570,11 +582,33 @@ int main(int argc, char* argv[])
         DrawVirtualObject("the_plane");
 
         // Desenhamos o modelo do cone
-        model = Matrix_Translate(2.0f,0.0f,2.0f);
+        model = Matrix_Translate(2.0f,2.0f,2.0f);
         // MUDAR MATRIX SCALE
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, CONE);
         DrawVirtualObject("Object_street_cones1_texture_dirt1.jpg");
+
+        //condicional que determina se o goleiro se move para a direita ou esquerda
+        if(dir)
+        {
+            zgoal += 0.05f;
+            if(zgoal >= 3.0f){
+                dir = false;
+            }
+        }else{
+            zgoal -= 0.05f;
+            if(zgoal <= -3.0f){
+                dir = true;
+            }
+        }
+        // Desenhamos o modelo do goleiro
+        model = Matrix_Translate(11.7f,1.15f,zgoal)
+            * Matrix_Rotate_X(M_PI)
+            * Matrix_Rotate_Z(M_PI);
+
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, GOAL);
+        DrawVirtualObject("Object_TexMap_0");
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
         // terceiro cubo.
@@ -745,6 +779,7 @@ void LoadShadersFromFiles()
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage3"), 3);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage4"), 4);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage5"), 5);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage6"), 6);
     glUseProgram(0);
 }
 
