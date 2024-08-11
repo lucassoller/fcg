@@ -313,7 +313,7 @@ int main(int argc, char* argv[])
 
     // Carregamos duas imagens para serem utilizadas como textura
     LoadTextureImage("../../data/textures/skybox.jpg");     // TextureImage0
-    LoadTextureImage("../../data/textures/bola.jpg");       // TextureImage1
+    LoadTextureImage("../../data/textures/bola2.jpg");      // TextureImage1
     LoadTextureImage("../../data/textures/field.jpeg");     // TextureImage2
     LoadTextureImage("../../data/textures/chao.jpg");       // TextureImage3
     LoadTextureImage("../../data/textures/player.jpg");     // TextureImage4
@@ -514,6 +514,7 @@ int main(int argc, char* argv[])
         #define SKYSPHERE 3
         #define PLANE  4
         #define CONE  5
+        #define BOLA  6
 
         // Desenha Infinito
         model = Matrix_Translate(camera_position_c.x,camera_position_c.y,camera_position_c.z);
@@ -533,7 +534,10 @@ int main(int argc, char* argv[])
               * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, SPHERE);
-        DrawVirtualObject("the_sphere");
+        DrawVirtualObject("Object__Soccer_ballWhit_0");
+        DrawVirtualObject("Object__Soccer_ballWhit_1");
+        DrawVirtualObject("Object__Soccer_ballBlac_2");
+        DrawVirtualObject("Object__Soccer_ballBlac_3");
 
         // Desenhamos o modelo do jogador
         if(!tecla_V){
