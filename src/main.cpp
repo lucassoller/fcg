@@ -358,7 +358,7 @@ int main(int argc, char* argv[])
     glFrontFace(GL_CCW);
 
     float r = g_CameraDistance;
-    float y = r*sin(g_CameraPhi);
+    float y = r*sin(g_CameraPhi) + 5.0;
     float z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
     float x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
 
@@ -527,8 +527,9 @@ int main(int argc, char* argv[])
         glEnable(GL_DEPTH_TEST);
 
         // Desenhamos o modelo da esfera
-        model = Matrix_Translate(-1.0f,0.0f,0.0f)
-              * Matrix_Rotate_X(g_AngleY + (float)glfwGetTime() * 0.1f);
+        model = Matrix_Translate(23.65f,-0.25f,0.4f)
+            * Matrix_Scale(1.5f, 1.5f, 1.5f);
+              //* Matrix_Rotate_Z(g_AngleZ + (float)glfwGetTime() * 0.1f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, SPHERE);
         DrawVirtualObject("Object__Soccer_ballWhit_0");
@@ -555,14 +556,14 @@ int main(int argc, char* argv[])
         DrawVirtualObject("Object_Sport_Sum_Man_Rt_5");
 
         // Desenhamos o plano do campo
-        model = Matrix_Translate(0.0f,-1.5f,0.0f)
+        model = Matrix_Translate(0.0f,4.6f,0.0f)
                 * Matrix_Scale(0.01f,0.01f,0.01f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, FIELD);
         DrawVirtualObject("field");
 
         //Desenhamos o plano do chão
-        model = Matrix_Translate(25.0f,-6.2f,0.0f)
+        model = Matrix_Translate(25.0f,-0.1f,0.0f)
                 * Matrix_Scale(50.0f,1.0f,50.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, PLANE);
