@@ -376,7 +376,7 @@ int main(int argc, char* argv[])
     float speed = 8.5f; // Velocidade da câmera
     float prev_time = (float)glfwGetTime();
 
-    camera_position_c  = glm::vec4(x,y,z,1.0f); // Ponto "c", centro da câmera
+    camera_position_c  = glm::vec4(x+50,y-3.8,z-3.5,1.0f); // Ponto "c", centro da câmera
     glm::vec4 camera_lookat_l    = glm::vec4(0.0f,0.0f,0.0f,1.0f); // Ponto "l", para onde a câmera (look-at) estará sempre olhando
     glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
     glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
@@ -569,6 +569,7 @@ int main(int argc, char* argv[])
 
         // Desenhamos o plano do campo
         model = Matrix_Translate(0.0f,4.6f,0.0f)
+        //model = Matrix_Translate(0.0f,3.8f,0.0f)
                 * Matrix_Scale(0.01f,0.01f,0.01f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, FIELD);
@@ -576,6 +577,7 @@ int main(int argc, char* argv[])
 
         //Desenhamos o plano do chão
         model = Matrix_Translate(25.0f,-0.1f,0.0f)
+        //model = Matrix_Translate(25.0f,3.8f,0.0f)
                 * Matrix_Scale(50.0f,1.0f,50.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, PLANE);
