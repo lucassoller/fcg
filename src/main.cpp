@@ -52,6 +52,7 @@
 #include "utils.h"
 #include "matrices.h"
 
+#include "collisions.cpp"
 // Estrutura que representa um modelo geométrico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
 struct ObjModel
@@ -249,6 +250,9 @@ bool mov3 = true;
 float xgoal3 = 88.8f;
 float zgoal3 = 25.8;
 float yrotate3 = -M_PI / 4;
+
+// bezier cubica
+glm::vec4 bezier_cubic(glm::vec4 p1, glm::vec4 p2, glm::vec4 v1, glm::vec4 v2);
 
 int main(int argc, char* argv[])
 {
@@ -546,6 +550,7 @@ int main(int argc, char* argv[])
         #define GOAL4  8
         #define CONE  9
         #define CIRCLE 23
+        #define SUN 24
 
         // Desenha Infinito
         model = Matrix_Translate(camera_position_c.x,camera_position_c.y,camera_position_c.z);
@@ -569,6 +574,15 @@ int main(int argc, char* argv[])
         DrawVirtualObject("Object__Soccer_ballWhit_1");
         DrawVirtualObject("Object__Soccer_ballBlac_2");
         DrawVirtualObject("Object__Soccer_ballBlac_3");
+
+        // Desenhamos o modelo da esfera
+        model =
+             Matrix_Translate( 76.5f,10.0f,0.28f)
+            * Matrix_Scale(2.0f, 2.0f, 2.0f);
+
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SUN);
+        DrawVirtualObject("the_sphere");
 
         // Desenhamos o modelo do jogador
         if(!tecla_V){
