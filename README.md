@@ -1,2 +1,1 @@
-# fcg-cae-chumbinha
-Repo for our project :)
+# Futebol_FCG
