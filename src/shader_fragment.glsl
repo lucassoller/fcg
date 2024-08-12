@@ -26,11 +26,12 @@ uniform mat4 projection;
 #define FIELD  2
 #define SKYSPHERE 3
 #define PLANE 4
-#define CONE 5
-#define GOAL 6
-#define GOAL2  7
-#define GOAL3  8
-#define GOAL4  9
+#define GOAL 5
+#define GOAL2  6
+#define GOAL3  7
+#define GOAL4  8
+#define CONE 9
+#define CIRCLE 23
 
 uniform int object_id;
 
@@ -165,7 +166,7 @@ void main()
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage3
         Kd0 = texture(TextureImage3, vec2(U,V)).rgb;
     }
-    else if ( object_id == CONE )
+    else if ( object_id >= CONE && object_id <= 22)
     {
         Ks = vec3(0.3,0.3,0.3);
         Ka = vec3(0.0,0.0,0.0);
@@ -183,8 +184,16 @@ void main()
 
         U = texcoords.x;
         V = texcoords.y;
-        // Obtemos a refletância difusa a partir da leitura da imagem TextureImage5
+        // Obtemos a refletância difusa a partir da leitura da imagem TextureImage6
         Kd0 = texture(TextureImage6, vec2(U,V)).rgb;
+    }
+    else if ( object_id == CIRCLE )
+    {
+        Kd = vec3(0.5,0.5,0.0);
+        Ks = vec3(0.0,0.0,0.0);
+        Ka = vec3(0.0,0.0,0.0);
+        q = 1;
+        color.a = 0;
     }
     else if ( object_id == SKYSPHERE )
     {
@@ -245,7 +254,6 @@ void main()
     //    suas distâncias para a câmera (desenhando primeiro objetos
     //    transparentes que estão mais longe da câmera).
     // Alpha default = 1 = 100% opaco = 0% transparente
-    color.a = 1;
 
     // Cor final do fragmento calculada com uma combinação dos termos difuso,
     // especular, e ambiente. Veja slide 129 do documento Aula_17_e_18_Modelos_de_Iluminacao.pdf.
@@ -254,13 +262,15 @@ void main()
     if(object_id == SKYSPHERE){
         color.rgb = Kd0 ;
     }
+    else if(object_id == CIRCLE){
+        color.a = 0;
+    }
     else{
         // Equação de Iluminação
         lambert_diffuse_term = Kd0 * I * max(0, dot(n, l));
         vec3 phong_specular_term  = Ks * I * pow(max(0, dot(r, v)), q);
         float lambert = max(0,dot(n,l));
         color.rgb = (Kd0 * (lambert + 0.01));
-
     }
 
     // NOTE: Se você quiser fazer o rendering de objetos transparentes, é
@@ -275,7 +285,6 @@ void main()
     //    suas distâncias para a câmera (desenhando primeiro objetos
     //    transparentes que estão mais longe da câmera).
     // Alpha default = 1 = 100% opaco = 0% transparente
-    color.a = 1;
 
     // Cor final com correção gamma, considerando monitor sRGB.
     // Veja https://en.wikipedia.org/w/index.php?title=Gamma_correction&oldid=751281772#Windows.2C_Mac.2C_sRGB_and_TV.2Fvideo_standard_gammas

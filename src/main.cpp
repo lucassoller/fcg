@@ -359,6 +359,10 @@ int main(int argc, char* argv[])
     ObjModel goalmodel("../../data/3d/goal.obj");
     ComputeNormals(&goalmodel);
     BuildTrianglesAndAddToVirtualScene(&goalmodel);
+/*
+    ObjModel circlemodel("../../data/3d/circle.obj");
+    ComputeNormals(&circlemodel);
+    BuildTrianglesAndAddToVirtualScene(&circlemodel);*/
 
     if ( argc > 1 )
     {
@@ -376,6 +380,9 @@ int main(int argc, char* argv[])
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     float r = g_CameraDistance;
     float y = r*sin(g_CameraPhi) + 5.0;
@@ -533,11 +540,12 @@ int main(int argc, char* argv[])
         #define FIELD  2
         #define SKYSPHERE 3
         #define PLANE  4
-        #define CONE  5
-        #define GOAL  6
-        #define GOAL2  7
-        #define GOAL3  8
-        #define GOAL4  9
+        #define GOAL  5
+        #define GOAL2  6
+        #define GOAL3  7
+        #define GOAL4  8
+        #define CONE  9
+        #define CIRCLE 23
 
         // Desenha Infinito
         model = Matrix_Translate(camera_position_c.x,camera_position_c.y,camera_position_c.z);
@@ -594,12 +602,32 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, PLANE);
         DrawVirtualObject("the_plane");
 
-        // Desenhamos o modelo do cone
-        model = Matrix_Translate(2.0f,2.0f,2.0f);
-        // MUDAR MATRIX SCALE
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, CONE);
-        DrawVirtualObject("Object_street_cones1_texture_dirt1.jpg");
+        glm::vec3 positions[] = {
+            glm::vec3(76.5f, 0.55f, 0.0f),
+            glm::vec3(76.5f, 0.55f, 1.5f),
+            glm::vec3(76.5f, 0.55f, 3.0f),
+            glm::vec3(76.5f, 0.55f, -1.5f),
+            glm::vec3(76.5f, 0.55f, -3.0f),
+            glm::vec3(50.0f, 0.55f, 20.0f),
+            glm::vec3(60.0f, 0.55f, -15.0f),
+            glm::vec3(21.5f, 0.55f, 7.0f),
+            glm::vec3(18.0f, 0.55f, -11.5f),
+            glm::vec3(35.0f, 0.55f, -2.0f),
+            glm::vec3(28.0f, 0.55f, 17.0f),
+            glm::vec3(80.0f, 0.55f, -19.0f),
+            glm::vec3(68.0f, 0.55f, 24.0f),
+            glm::vec3(58.0f, 0.55f, 14.0f),
+        };
+
+        for (int i = 0; i < 14; ++i) {
+            // Desenhamos o modelo do cone
+            model = Matrix_Translate(positions[i].x,0.55f,positions[i].z)
+                * Matrix_Scale(0.5f, 0.5f, 0.5f);
+
+            glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+            glUniform1i(g_object_id_uniform, CONE+i);
+            DrawVirtualObject("Object_street_cones1_texture_dirt1.jpg");
+        }
 
         //condicional que movimenta o adversario
         if(mov)
@@ -639,7 +667,7 @@ int main(int argc, char* argv[])
                 mov2 = true;
             }
         }
-        // Desenhamos o modelo do adversario3
+        // Desenhamos o modelo do adversario2
         // x = 27 -> 50, y = 1.05, z = 10
         model = Matrix_Translate(xgoal2,1.05f,10.0f)
             * Matrix_Rotate_Y(yrotate2)
@@ -666,8 +694,8 @@ int main(int argc, char* argv[])
                 mov3 = true;
             }
         }
-        // Desenhamos o modelo do goleiro3
-        // x = 27 -> 88.7, y = 1.05, z = 25.8
+        // Desenhamos o modelo do adverario3
+        // x = 37 -> 88.7, y = 1.05, z = 25.8
         model = Matrix_Translate(xgoal3,1.05f,zgoal3)
             * Matrix_Rotate_Y(yrotate3)
             * Matrix_Scale(0.9f, 0.9f, 0.9f);
@@ -675,6 +703,15 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, GOAL3);
         DrawVirtualObject("Object_TexMap_0");
+
+
+       /* // Desenhamos o circulo
+        model = Matrix_Translate(23.0f,0.0f,0.0f)
+            * Matrix_Rotate_X(M_PI);
+               // * Matrix_Scale(0.01f,0.01f,0.01f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, CIRCLE);
+        DrawVirtualObject("circle");*/
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
         // terceiro cubo.
