@@ -32,6 +32,7 @@ uniform mat4 projection;
 #define GOAL4  8
 #define CONE 9
 #define CIRCLE 23
+#define SUN 24
 
 uniform int object_id;
 
@@ -47,6 +48,7 @@ uniform sampler2D TextureImage3;
 uniform sampler2D TextureImage4;
 uniform sampler2D TextureImage5;
 uniform sampler2D TextureImage6;
+uniform sampler2D TextureImage7;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
@@ -122,6 +124,35 @@ void main()
 
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage1
         Kd0 = texture(TextureImage1, vec2(U,V)).rgb;
+    }
+    if ( object_id == SUN )
+    {
+        // PREENCHA AQUI as coordenadas de textura da esfera, computadas com
+        // projeção esférica EM COORDENADAS DO MODELO. Utilize como referência
+        // o slides 134-150 do documento Aula_20_Mapeamento_de_Texturas.pdf.
+        // A esfera que define a projeção deve estar centrada na posição
+        // "bbox_center" definida abaixo.
+
+        // Você deve utilizar:
+        //   função 'length( )' : comprimento Euclidiano de um vetor
+        //   função 'atan( , )' : arcotangente. Veja https://en.wikipedia.org/wiki/Atan2.
+        //   função 'asin( )'   : seno inverso.
+        //   constante M_PI
+        //   variável position_model
+
+        vec4 bbox_center = (bbox_min + bbox_max) / 2.0;
+
+        p = position_model - bbox_center;
+
+        float ro = length(p);
+        float theta = atan(p.x, p.z);
+        float phi = asin(p.y/ro);
+
+        U = (theta + M_PI)/(2*M_PI);
+        V = (phi + (M_PI_2))/(M_PI);
+
+        // Obtemos a refletância difusa a partir da leitura da imagem TextureImage7
+        Kd0 = texture(TextureImage7, vec2(U,V)).rgb;
     }
     else if ( object_id == PLAYER )
     {
