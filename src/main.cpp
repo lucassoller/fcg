@@ -252,7 +252,7 @@ float zgoal3 = 25.8;
 float yrotate3 = -M_PI / 4;
 
 // bezier cubica
-glm::vec4 bezier_cubic(glm::vec4 p1, glm::vec4 p2, glm::vec4 v1, glm::vec4 v2);
+glm::vec4 bezier_cubic(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3, glm::vec4 p4, float t);
 
 int main(int argc, char* argv[])
 {
@@ -402,6 +402,9 @@ int main(int argc, char* argv[])
     glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
     glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
     glm::vec4 last_cam_pos = camera_position_c;
+
+    bool sun_back = false;
+    float t_sun = 0.0f;
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -575,9 +578,30 @@ int main(int argc, char* argv[])
         DrawVirtualObject("Object__Soccer_ballBlac_2");
         DrawVirtualObject("Object__Soccer_ballBlac_3");
 
+        // bezier cubica
+        float bezier_speed = 0.45f;
+        if(t_sun < 1.0f && !sun_back) {
+            t_sun += delta_t * bezier_speed;
+        }
+        else {
+            t_sun -= delta_t * bezier_speed;
+            sun_back = true;
+            if (t_sun<=0) {
+                sun_back = false;
+                t_sun = 0;
+            }
+        }
+
+        glm::vec4 p1 = glm::vec4(0.0f,15.0f,20.0f,1.0f);
+        glm::vec4 p2 = glm::vec4(76.5f,15.0f,20.0f,1.0f);
+        glm::vec4 p3 = glm::vec4(0.0f,15.0f,-20.0f,1.0f);
+        glm::vec4 p4 = glm::vec4(76.5f,15.0f,-20.0f,1.0f);
+        glm::vec4 bezier_c;
+
+        bezier_c = bezier_cubic(p1, p2, p3, p4, t_sun);
+
         // Desenhamos o modelo da esfera
-        model =
-             Matrix_Translate( 76.5f,10.0f,0.28f)
+        model = Matrix_Translate( bezier_c.x,bezier_c.y,bezier_c.z)
             * Matrix_Scale(2.0f, 2.0f, 2.0f);
 
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
@@ -758,6 +782,19 @@ int main(int argc, char* argv[])
 
     // Fim do programa
     return 0;
+}
+
+glm::vec4 bezier_cubic(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3, glm::vec4 p4, float t){
+    glm::vec4 c12 = p1 + t * (p2 - p1);
+    glm::vec4 c23 = p2 + t * (p3 - p2);
+    glm::vec4 c34 = p3 + t * (p4 - p3);
+
+    glm::vec4 c123 = c12 + t * (c23 - c12);
+    glm::vec4 c234 = c23 + t * (c34 - c23);
+
+    glm::vec4 bezier_c = c123 + t * (c234 - c123);
+
+    return bezier_c;
 }
 
 // Função que carrega uma imagem para ser utilizada como textura
