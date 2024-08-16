@@ -250,6 +250,8 @@ float xgoal3 = 88.8f;
 float zgoal3 = 25.8;
 float yrotate3 = -M_PI / 4;
 
+bool colide = false;
+
 // bezier cubica
 glm::vec4 bezier_cubic(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3, glm::vec4 p4, float t);
 
@@ -356,6 +358,10 @@ int main(int argc, char* argv[])
     ComputeNormals(&planemodel);
     BuildTrianglesAndAddToVirtualScene(&planemodel);
 
+    ObjModel planemodel2("../../data/3d/plane2.obj");
+    ComputeNormals(&planemodel2);
+    BuildTrianglesAndAddToVirtualScene(&planemodel2);
+
     ObjModel conemodel("../../data/3d/cone.obj");
     ComputeNormals(&conemodel);
     BuildTrianglesAndAddToVirtualScene(&conemodel);
@@ -363,10 +369,6 @@ int main(int argc, char* argv[])
     ObjModel goalmodel("../../data/3d/goal.obj");
     ComputeNormals(&goalmodel);
     BuildTrianglesAndAddToVirtualScene(&goalmodel);
-/*
-    ObjModel circlemodel("../../data/3d/circle.obj");
-    ComputeNormals(&circlemodel);
-    BuildTrianglesAndAddToVirtualScene(&circlemodel);*/
 
     if ( argc > 1 )
     {
@@ -401,6 +403,8 @@ int main(int argc, char* argv[])
     glm::vec4 camera_lookat_l    = glm::vec4(0.0f,0.0f,0.0f,1.0f); // Ponto "l", para onde a câmera (look-at) estará sempre olhando
     glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
     glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
+    glm::vec4 last_draw;
+    glm::vec4 last_view_draw;
     glm::vec4 last_cam_pos = camera_position_c;
 
     bool sun_back = false;
@@ -442,8 +446,8 @@ int main(int argc, char* argv[])
         prev_time = current_time;
 
         // Defina os limites para a câmera
-        float minX = -20.0f, maxX = 20.0f;
-        float minZ = -20.0f, maxZ = 20.0f;
+        float minX = 6.0f, maxX = 94.0f;
+        float minZ = -28.0f, maxZ = 28.0f;
 
         // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
         // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
@@ -467,37 +471,37 @@ int main(int argc, char* argv[])
             u = u / norm(u);
 
             // *** MOVIMENTACAO ***
-                        if (tecla_W_pressionada) {
+            if (tecla_W_pressionada) {
                 float new_x = camera_position_c.x - w.x * speed * delta_t;
                 float new_z = camera_position_c.z - w.z * speed * delta_t;
-               // if (new_x >= minX && new_x <= maxX && new_z >= minZ && new_z <= maxZ) {
+                if (new_x >= minX && new_x <= maxX && new_z >= minZ && new_z <= maxZ) {
                     camera_position_c.x = new_x;
                     camera_position_c.z = new_z;
-               // }
+                }
             }
             if (tecla_A_pressionada) {
                 float new_x = camera_position_c.x - u.x * speed * delta_t;
                 float new_z = camera_position_c.z - u.z * speed * delta_t;
-               // if (new_x >= minX && new_x <= maxX && new_z >= minZ && new_z <= maxZ) {
+                if (new_x >= minX && new_x <= maxX && new_z >= minZ && new_z <= maxZ) {
                     camera_position_c.x = new_x;
                     camera_position_c.z = new_z;
-                //}
+                }
             }
             if (tecla_S_pressionada) {
                 float new_x = camera_position_c.x + w.x * speed * delta_t;
                 float new_z = camera_position_c.z + w.z * speed * delta_t;
-               // if (new_x >= minX && new_x <= maxX && new_z >= minZ && new_z <= maxZ) {
+                if (new_x >= minX && new_x <= maxX && new_z >= minZ && new_z <= maxZ) {
                     camera_position_c.x = new_x;
                     camera_position_c.z = new_z;
-                //}
+                }
             }
             if (tecla_D_pressionada) {
                 float new_x = camera_position_c.x + u.x * speed * delta_t;
                 float new_z = camera_position_c.z + u.z * speed * delta_t;
-               // if (new_x >= minX && new_x <= maxX && new_z >= minZ && new_z <= maxZ) {
+                if (new_x >= minX && new_x <= maxX && new_z >= minZ && new_z <= maxZ) {
                     camera_position_c.x = new_x;
                     camera_position_c.z = new_z;
-               // }
+                }
             }
         }
         // Computamos a matriz "View" utilizando os parâmetros da câmera para
@@ -555,14 +559,6 @@ int main(int argc, char* argv[])
         #define CIRCLE 23
         #define SUN 24
 
-                // coords dos planos
-        // x = 11 (goleiro)
-        // x = 6 (cerca)
-        // x = 94
-        // z = 28
-        // z = -28
-
-
         // Desenha Infinito
         model = Matrix_Translate(camera_position_c.x,camera_position_c.y,camera_position_c.z);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
@@ -574,11 +570,13 @@ int main(int argc, char* argv[])
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
 
-        // 0,4 circ
-        // 0,2 raio
+        float xSphere = 23.7f;
+
         // Desenhamos o modelo da esfera
-        model =
-             Matrix_Translate(23.7f -(float)glfwGetTime() * 0.2f,-0.2f,0.28f);
+        if(colide){
+            xSphere -= (float)glfwGetTime() * 0.3f;
+        }
+        model = Matrix_Translate(xSphere,-0.2f,0.28f);
 
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, SPHERE);
@@ -587,26 +585,41 @@ int main(int argc, char* argv[])
         DrawVirtualObject("Object__Soccer_ballBlac_2");
         DrawVirtualObject("Object__Soccer_ballBlac_3");
 
-        // Configurar o plano
-        collisions::Plane plane;
-        plane.normal = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f); // Normal do plano (no eixo x)
-        plane.distance = 11.0f; // Distância do plano à origem (o plano passa pela origem)
+        // Configurar o plano do goleiro
+        collisions::Plane goalPlane;
+        goalPlane.normal = glm::vec4(1.0f, 0.0f, 0.0f,1.0f); // Normal do plano (no eixo x)
+        goalPlane.distance = 11.0f; // Distância do plano à origem (o plano passa pela origem)
 
-        // Parâmetros da esfera do seu código OpenGL
-        glm::vec4 sphereCenter = glm::vec4(23.7 -(float)glfwGetTime() * 0.2f,-0.2f,0.28f, 1.0f);
-        float sphereRadius = 0.2f; // Ajuste conforme necessário
+        // Configurar o plano oeste
+        collisions::Plane westPlane;
+        westPlane.normal = glm::vec4(1.0f, 0.0f, 0.0f,1.0f); // Normal do plano (no eixo x)
+        westPlane.distance = 6.0f; // Distância do plano à origem (o plano passa pela origem)
+
+        // Configurar o plano leste
+        collisions::Plane eastPlane;
+        eastPlane.normal = glm::vec4(1.0f, 0.0f, 0.0f,1.0f); // Normal do plano (no eixo x)
+        eastPlane.distance = 94.0f; // Distância do plano à origem (o plano passa pela origem)
+
+        // Configurar o plano norte
+        collisions::Plane northPlane;
+        northPlane.normal = glm::vec4(0.0f, 0.0f, 1.0f,1.0f); // Normal do plano (no eixo z)
+        northPlane.distance = 28.0f; // Distância do plano à origem (o plano passa pela origem)
+
+        // Configurar o plano sul
+        collisions::Plane southPlane;
+        southPlane.normal = glm::vec4(0.0f, 0.0f, 1.0f,1.0f); // Normal do plano (no eixo z)
+        southPlane.distance = -28.0f; // Distância do plano à origem (o plano passa pela origem)
 
         // Configurar a esfera
         collisions::Sphere sphere;
-        sphere.center = sphereCenter;
-        sphere.radius = sphereRadius;
+        sphere.center = glm::vec4(xSphere,-0.2f,0.28f,1.0f);
+        sphere.radius = 0.2f;
 
         // Verificar colisão
-        if (collisions::checkCollision(sphere, plane)) {
-            printf("A esfera está colidindo com o plano.");
-            break;
+        if (collisions::checkCollision(sphere, westPlane)) {
+            printf("GOOOOOL.");
+           // break;
         }
-
 
         // bezier cubica
         float bezier_speed = 0.45f;
@@ -661,12 +674,31 @@ int main(int argc, char* argv[])
         glm::vec3 bbox_max4 = g_VirtualScene["Object_Sport_Sum_Man_Rt_4"].bbox_max;
         glm::vec3 bbox_min5 = g_VirtualScene["Object_Sport_Sum_Man_Rt_5"].bbox_min;
         glm::vec3 bbox_max5 = g_VirtualScene["Object_Sport_Sum_Man_Rt_5"].bbox_max;
+
         // Verifica colisao do jogador com a bola
         if (collisions::checkCollision(sphere, bbox_min4, bbox_max4, model) ||
             collisions::checkCollision(sphere, bbox_min5, bbox_max5, model)) {
             printf("A esfera está colidindo com o jogador.");
+            colide = true;
         }
 
+        // Verifica colisao do jogador com os planos
+        if (collisions::checkCollision(bbox_min4, bbox_max4, model, northPlane) ||
+            collisions::checkCollision(bbox_min5, bbox_max5, model, northPlane)){
+                printf("O jogador colidiu com o plano norte.");
+        }
+        if (collisions::checkCollision(bbox_min4, bbox_max4, model, southPlane) ||
+            collisions::checkCollision(bbox_min5, bbox_max5, model, southPlane)){
+                printf("O jogador colidiu com o plano sul.");
+        }
+        if (collisions::checkCollision(bbox_min4, bbox_max4, model, eastPlane) ||
+            collisions::checkCollision(bbox_min5, bbox_max5, model, eastPlane)){
+                printf("O jogador colidiu com o plano leste.");
+        }
+        if(collisions::checkCollision(bbox_min4, bbox_max4, model, westPlane) ||
+            collisions::checkCollision(bbox_min5, bbox_max5, model, westPlane)){
+                printf("O jogador colidiu com o plano oeste.");
+        }
 
         // Desenhamos o plano do campo
         model = Matrix_Translate(0.0f,4.6f,0.0f)
@@ -705,7 +737,7 @@ int main(int argc, char* argv[])
                 * Matrix_Scale(0.5f, 0.5f, 0.5f);
 
             glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-            glUniform1i(g_object_id_uniform, CONE+i);
+            glUniform1i(g_object_id_uniform, CONE);
             DrawVirtualObject("Object_street_cones1_texture_dirt1.jpg");
         }
 
@@ -731,6 +763,18 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, GOAL);
         DrawVirtualObject("Object_TexMap_0");
+
+        // Configurar o goleiro1
+        collisions::Cylinder cylinderGoal1;
+        cylinderGoal1.center = glm::vec4(11.7,0.0f,zgoal,1.0f);
+        cylinderGoal1.radius = 0.2f;
+        cylinderGoal1.height = 2.5f;
+
+        // Verificar colisão
+        if (collisions::checkCollision(cylinderGoal1, sphere)) {
+            printf("Goleiro pegou a bola fim de jogo.");
+           // break;
+        }
 
         //condicional que movimenta o adversario2
         if(mov2)

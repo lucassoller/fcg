@@ -1,4 +1,3 @@
-
 #include "collisions.h"
 #include <algorithm>
 
@@ -81,9 +80,75 @@ namespace collisions
         return distanceSquared <= (radiusSum * radiusSum);
     }
 
+    // Função para calcular a distância entre o centro da esfera e o plano
     bool checkCollision(const Sphere& sphere, const Plane& plane) {
         float distanceToPlane = dotproduct(plane.normal, sphere.center) - plane.distance;
         return std::abs(distanceToPlane) <= sphere.radius;
+    }
+
+    // Função para calcular a distância entre o centro do cilindro e o plano
+    bool checkCollision(const Cylinder& cylinder, const Plane& plane) {
+
+        float distanceToPlane = dotproduct(plane.normal, cylinder.center) - plane.distance;
+        return std::abs(distanceToPlane) <= cylinder.radius;
+    }
+
+        // Função para verificar a colisão entre a caixa e o plano
+    bool checkCollision(const glm::vec3 &bboxmin, const glm::vec3 &bboxmax, const glm::mat4 &modelMatrix, const Plane& plane) {
+
+        glm::vec4 bbox_min = modelMatrix * glm::vec4(bboxmin, 1.0f);
+        glm::vec4 bbox_max = modelMatrix * glm::vec4(bboxmax, 1.0f);
+        // Encontre todos os vértices da caixa
+        glm::vec4 corners[8] = {
+            glm::vec4(bbox_min.x, bbox_min.y, bbox_min.z, 1.0f),
+            glm::vec4(bbox_max.x, bbox_min.y, bbox_min.z, 1.0f),
+            glm::vec4(bbox_min.x, bbox_max.y, bbox_min.z, 1.0f),
+            glm::vec4(bbox_max.x, bbox_max.y, bbox_min.z, 1.0f),
+            glm::vec4(bbox_min.x, bbox_min.y, bbox_max.z, 1.0f),
+            glm::vec4(bbox_max.x, bbox_min.y, bbox_max.z, 1.0f),
+            glm::vec4(bbox_min.x, bbox_max.y, bbox_max.z, 1.0f),
+            glm::vec4(bbox_max.x, bbox_max.y, bbox_max.z, 1.0f)
+        };
+
+        // Verifica a distância de cada vértice ao plano
+        bool isColliding = false;
+        for (const auto& corner : corners) {
+            float distance = dotproduct(plane.normal, corner) - plane.distance;
+            if (std::abs(distance) <= 0.0f) {
+                // Se a distância ao plano é zero, há uma colisão
+                isColliding = true;
+                break;
+            }
+        }
+
+        // Verifica se a caixa está cruzando o plano
+        if (!isColliding) {
+            // Para uma caixa, os planos de face podem intersectar o plano
+            glm::vec4 boxPlanes[6][2] = {
+                {glm::vec4(bbox_min.x, bbox_min.y, bbox_min.z, 1.0f), glm::vec4(bbox_max.x, bbox_min.y, bbox_min.z, 1.0f)},
+                {glm::vec4(bbox_min.x, bbox_min.y, bbox_max.z, 1.0f), glm::vec4(bbox_max.x, bbox_min.y, bbox_max.z, 1.0f)},
+                {glm::vec4(bbox_min.x, bbox_min.y, bbox_min.z, 1.0f), glm::vec4(bbox_min.x, bbox_max.y, bbox_min.z, 1.0f)},
+                {glm::vec4(bbox_min.x, bbox_min.y, bbox_max.z, 1.0f), glm::vec4(bbox_min.x, bbox_max.y, bbox_max.z, 1.0f)},
+                {glm::vec4(bbox_min.x, bbox_min.y, bbox_min.z, 1.0f), glm::vec4(bbox_min.x, bbox_min.y, bbox_max.z, 1.0f)},
+                {glm::vec4(bbox_max.x, bbox_min.y, bbox_min.z, 1.0f), glm::vec4(bbox_max.x, bbox_min.y, bbox_max.z, 1.0f)}
+            };
+
+            for (const auto& planePair : boxPlanes) {
+                glm::vec4 corner1 = planePair[0];
+                glm::vec4 corner2 = planePair[1];
+
+                float dist1 = dotproduct(plane.normal, corner1) - plane.distance;
+                float dist2 = dotproduct(plane.normal, corner2) - plane.distance;
+
+                if ((dist1 <= 0.0f && dist2 >= 0.0f) || (dist1 >= 0.0f && dist2 <= 0.0f)) {
+                    // Se os pontos estão em lados opostos do plano
+                    isColliding = true;
+                    break;
+                }
+            }
+        }
+
+        return isColliding;
     }
 
     // Produto escalar entre dois vetores u e v definidos em um sistema de
@@ -98,12 +163,6 @@ namespace collisions
         float v2 = v.y;
         float v3 = v.z;
         float v4 = v.w;
-
-        if ( u4 != 0.0f || v4 != 0.0f )
-        {
-            fprintf(stderr, "ERROR: Produto escalar não definido para pontos.\n");
-            std::exit(EXIT_FAILURE);
-        }
 
         return u1*v1 + u2*v2 + u3*v3;
     }

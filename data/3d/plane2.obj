@@ -1,8 +1,8 @@
-g the_plane
+g the_plane2
 
 v -1 0 1
-v 2 0 1
-v 2 0 -1
+v 1 0 1
+v 1 0 -1
 v -1 0 -1
 
 vt 0 0
