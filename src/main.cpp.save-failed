@@ -52,6 +52,7 @@
 #include "utils.h"
 #include "matrices.h"
 
+#include "collisions.h"
 // Estrutura que representa um modelo geométrico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
 struct ObjModel
@@ -116,7 +117,6 @@ bool tecla_A_pressionada = false;
 bool tecla_S_pressionada = false;
 bool tecla_D_pressionada = false;
 bool tecla_V = false;
-
 
 // Declaração de funções utilizadas para pilha de matrizes de modelagem.
 void PushMatrix(glm::mat4 M);
@@ -237,11 +237,21 @@ GLuint g_NumLoadedTextures = 0;
 
 #define M_PI   3.14159265358979323846
 
-bool dir = true;
+// valores e coordenadas iniciais dos adversarios
+bool mov = true;
 float zgoal = 0.0f;
-bool dir2 = true;
+
+bool mov2 = true;
 float xgoal2 = 27.5f;
 float yrotate2 = M_PI;
+
+bool mov3 = true;
+float xgoal3 = 88.8f;
+float zgoal3 = 25.8;
+float yrotate3 = -M_PI / 4;
+
+// bezier cubica
+glm::vec4 bezier_cubic(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3, glm::vec4 p4, float t);
 
 int main(int argc, char* argv[])
 {
@@ -327,6 +337,7 @@ int main(int argc, char* argv[])
     LoadTextureImage("../../data/textures/player.jpg");     // TextureImage4
     LoadTextureImage("../../data/textures/cone.jpg");       // TextureImage5
     LoadTextureImage("../../data/textures/goal.jpg");       // TextureImage6
+    LoadTextureImage("../../data/textures/sol.jpg");       // TextureImage7
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/3d/sphere.obj");
@@ -352,6 +363,10 @@ int main(int argc, char* argv[])
     ObjModel goalmodel("../../data/3d/goal.obj");
     ComputeNormals(&goalmodel);
     BuildTrianglesAndAddToVirtualScene(&goalmodel);
+/*
+    ObjModel circlemodel("../../data/3d/circle.obj");
+    ComputeNormals(&circlemodel);
+    BuildTrianglesAndAddToVirtualScene(&circlemodel);*/
 
     if ( argc > 1 )
     {
@@ -370,6 +385,9 @@ int main(int argc, char* argv[])
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     float r = g_CameraDistance;
     float y = r*sin(g_CameraPhi) + 5.0;
     float z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
@@ -384,6 +402,9 @@ int main(int argc, char* argv[])
     glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
     glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
     glm::vec4 last_cam_pos = camera_position_c;
+
+    bool sun_back = false;
+    float t_sun = 0.0f;
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -526,11 +547,14 @@ int main(int argc, char* argv[])
         #define FIELD  2
         #define SKYSPHERE 3
         #define PLANE  4
-        #define CONE  5
-        #define GOAL  6
-        #define GOAL2  7
-        #define GOAL3  8
-        #define GOAL4  9
+        #define GOAL  5
+        #define GOAL2  6
+        #define GOAL3  7
+        #define GOAL4  8
+        #define CONE  9
+        #define CIRCLE 23
+        #define SUN 24
+
 
         // Desenha Infinito
         model = Matrix_Translate(camera_position_c.x,camera_position_c.y,camera_position_c.z);
@@ -543,10 +567,13 @@ int main(int argc, char* argv[])
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
 
+        // 0,4 circ
+        // 0,2 raio
         // Desenhamos o modelo da esfera
         model =
-             Matrix_Translate(23.7f -(float)glfwGetTime() * 0.2f,-0.2f,0.28f)
-            * Matrix_Scale(1.0f, 1.0f, 1.0f);
+             Matrix_Translate(23.7f
+                              // -(float)glfwGetTime() * 0.2f
+                              ,-0.2f,0.28f);
 
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, SPHERE);
@@ -554,6 +581,57 @@ int main(int argc, char* argv[])
         DrawVirtualObject("Object__Soccer_ballWhit_1");
         DrawVirtualObject("Object__Soccer_ballBlac_2");
         DrawVirtualObject("Object__Soccer_ballBlac_3");
+
+        // Configurar o plano
+        collisions::Plane plane;
+        plane.normal = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f); // Normal do plano (no eixo x)
+        plane.distance = 20.0f; // Distância do plano à origem (o plano passa pela origem)
+
+        // Parâmetros da esfera do seu código OpenGL
+        glm::vec4 sphereCenter = glm::vec4(22.0f, -0.2f, 0.28f, 1.0f);
+        float sphereRadius = 1.0f; // Ajuste conforme necessário
+
+        // Configurar a esfera
+        collisions::Sphere sphere;
+        sphere.center = sphereCenter;
+        sphere.radius = sphereRadius;
+
+        // Verificar colisão
+        if (collisions::checkCollision(sphere, plane)) {
+            printf("A esfera está colidindo com o plano.");
+            break;
+        }
+
+
+        // bezier cubica
+        float bezier_speed = 0.45f;
+        if(t_sun < 1.0f && !sun_back) {
+            t_sun += delta_t * bezier_speed;
+        }
+        else {
+            t_sun -= delta_t * bezier_speed;
+            sun_back = true;
+            if (t_sun<=0) {
+                sun_back = false;
+                t_sun = 0;
+            }
+        }
+
+        glm::vec4 p1 = glm::vec4(0.0f,15.0f,20.0f,1.0f);
+        glm::vec4 p2 = glm::vec4(76.5f,15.0f,20.0f,1.0f);
+        glm::vec4 p3 = glm::vec4(0.0f,15.0f,-20.0f,1.0f);
+        glm::vec4 p4 = glm::vec4(76.5f,15.0f,-20.0f,1.0f);
+        glm::vec4 bezier_c;
+
+        bezier_c = bezier_cubic(p1, p2, p3, p4, t_sun);
+
+        // Desenhamos o modelo da esfera
+        model = Matrix_Translate( bezier_c.x,bezier_c.y,bezier_c.z)
+            * Matrix_Scale(2.0f, 2.0f, 2.0f);
+
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SUN);
+        DrawVirtualObject("the_sphere");
 
         // Desenhamos o modelo do jogador
         if(!tecla_V){
@@ -587,27 +665,56 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, PLANE);
         DrawVirtualObject("the_plane");
 
-        // Desenhamos o modelo do cone
-        model = Matrix_Translate(2.0f,2.0f,2.0f);
-        // MUDAR MATRIX SCALE
+                //Desenhamos o plano do chão
+        model = Matrix_Translate(0.0f,2.0f,0.0f)
+        * Matrix_Rotate_X(M_PI/2)
+                * Matrix_Scale(50.0f,1.0f,50.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, CONE);
-        DrawVirtualObject("Object_street_cones1_texture_dirt1.jpg");
+        glUniform1i(g_object_id_uniform, 25);
+        DrawVirtualObject("the_plane");
 
-        //condicional que determina se o goleiro se move para a direita ou esquerda
-        if(dir)
+        glm::vec3 positions[] = {
+            glm::vec3(76.5f, 0.55f, 0.0f),
+            glm::vec3(76.5f, 0.55f, 1.5f),
+            glm::vec3(76.5f, 0.55f, 3.0f),
+            glm::vec3(76.5f, 0.55f, -1.5f),
+            glm::vec3(76.5f, 0.55f, -3.0f),
+            glm::vec3(50.0f, 0.55f, 20.0f),
+            glm::vec3(60.0f, 0.55f, -15.0f),
+            glm::vec3(21.5f, 0.55f, 7.0f),
+            glm::vec3(18.0f, 0.55f, -11.5f),
+            glm::vec3(35.0f, 0.55f, -2.0f),
+            glm::vec3(28.0f, 0.55f, 17.0f),
+            glm::vec3(80.0f, 0.55f, -19.0f),
+            glm::vec3(68.0f, 0.55f, 24.0f),
+            glm::vec3(58.0f, 0.55f, 14.0f),
+        };
+
+        for (int i = 0; i < 14; ++i) {
+            // Desenhamos o modelo do cone
+            model = Matrix_Translate(positions[i].x,0.55f,positions[i].z)
+                * Matrix_Scale(0.5f, 0.5f, 0.5f);
+
+            glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+            glUniform1i(g_object_id_uniform, CONE+i);
+            DrawVirtualObject("Object_street_cones1_texture_dirt1.jpg");
+        }
+
+        //condicional que movimenta o adversario
+        if(mov)
         {
             zgoal += 0.05f;
             if(zgoal >= 3.0f){
-                dir = false;
+                mov = false;
             }
         }else{
             zgoal -= 0.05f;
             if(zgoal <= -3.0f){
-                dir = true;
+                mov = true;
             }
         }
         // Desenhamos o modelo do goleiro
+        // x = 11.7, y = 1.05, z = -3 -> 3
         model = Matrix_Translate(11.7f,1.05f,zgoal)
             * Matrix_Rotate_Y(M_PI)
             * Matrix_Scale(0.9f, 0.9f, 0.9f);
@@ -616,30 +723,66 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, GOAL);
         DrawVirtualObject("Object_TexMap_0");
 
-        //condicional que determina se o goleiro se move para a direita ou esquerda
-        if(dir2)
+        //condicional que movimenta o adversario2
+        if(mov2)
         {
             xgoal2 += 0.08f;
             if(xgoal2 >= 50.0f){
                 yrotate2 = M_PI * 2;
-                dir2 = false;
+                mov2 = false;
             }
         }else{
             xgoal2 -= 0.08f;
             if(xgoal2 <= 27.0f){
                 yrotate2 = M_PI;
-                dir2 = true;
+                mov2 = true;
             }
         }
-        // Desenhamos o modelo do goleiro2
+        // Desenhamos o modelo do adversario2
+        // x = 27 -> 50, y = 1.05, z = 10
         model = Matrix_Translate(xgoal2,1.05f,10.0f)
             * Matrix_Rotate_Y(yrotate2)
             * Matrix_Scale(0.9f, 0.9f, 0.9f);
 
-
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, GOAL2);
         DrawVirtualObject("Object_TexMap_0");
+
+        //condicional que movimenta o adversario3
+        if(mov3)
+        {
+            xgoal3 -= 0.08f;
+            zgoal3 -= 0.08f;
+            if(xgoal3 <= 37.0f){
+                yrotate3 = 3 * M_PI / 4;
+                mov3 = false;
+            }
+        }else{
+            xgoal3 += 0.08f;
+            zgoal3 += 0.08f;
+            if(xgoal3 >= 88.7f){
+                yrotate3 = -M_PI / 4;
+                mov3 = true;
+            }
+        }
+        // Desenhamos o modelo do adverario3
+        // x = 37 -> 88.7, y = 1.05, z = 25.8
+        model = Matrix_Translate(xgoal3,1.05f,zgoal3)
+            * Matrix_Rotate_Y(yrotate3)
+            * Matrix_Scale(0.9f, 0.9f, 0.9f);
+
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, GOAL3);
+        DrawVirtualObject("Object_TexMap_0");
+
+
+       /* // Desenhamos o circulo
+        model = Matrix_Translate(23.0f,0.0f,0.0f)
+            * Matrix_Rotate_X(M_PI);
+               // * Matrix_Scale(0.01f,0.01f,0.01f);
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, CIRCLE);
+        DrawVirtualObject("circle");*/
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
         // terceiro cubo.
@@ -672,6 +815,19 @@ int main(int argc, char* argv[])
 
     // Fim do programa
     return 0;
+}
+
+glm::vec4 bezier_cubic(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3, glm::vec4 p4, float t){
+    glm::vec4 c12 = p1 + t * (p2 - p1);
+    glm::vec4 c23 = p2 + t * (p3 - p2);
+    glm::vec4 c34 = p3 + t * (p4 - p3);
+
+    glm::vec4 c123 = c12 + t * (c23 - c12);
+    glm::vec4 c234 = c23 + t * (c34 - c23);
+
+    glm::vec4 bezier_c = c123 + t * (c234 - c123);
+
+    return bezier_c;
 }
 
 // Função que carrega uma imagem para ser utilizada como textura
@@ -811,6 +967,7 @@ void LoadShadersFromFiles()
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage4"), 4);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage5"), 5);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage6"), 6);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage7"), 7);
     glUseProgram(0);
 }
 

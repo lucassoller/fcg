@@ -33,6 +33,7 @@ uniform mat4 projection;
 #define CONE 9
 #define CIRCLE 23
 #define SUN 24
+#define PLANE2 25
 
 uniform int object_id;
 
@@ -186,7 +187,7 @@ void main()
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage2
         Kd0 = texture(TextureImage2, vec2(U,V)).rgb;
     }
-    else if ( object_id == PLANE )
+    else if ( object_id == PLANE || object_id == PLANE2)
     {
         // Coordenadas de textura do plano, obtidas do arquivo OBJ.
         U = texcoords.x * 30;

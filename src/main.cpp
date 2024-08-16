@@ -52,7 +52,7 @@
 #include "utils.h"
 #include "matrices.h"
 
-#include "collisions.cpp"
+#include "collisions.h"
 // Estrutura que representa um modelo geométrico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
 struct ObjModel
@@ -117,7 +117,6 @@ bool tecla_A_pressionada = false;
 bool tecla_S_pressionada = false;
 bool tecla_D_pressionada = false;
 bool tecla_V = false;
-
 
 // Declaração de funções utilizadas para pilha de matrizes de modelagem.
 void PushMatrix(glm::mat4 M);
@@ -332,7 +331,7 @@ int main(int argc, char* argv[])
 
     // Carregamos duas imagens para serem utilizadas como textura
     LoadTextureImage("../../data/textures/skybox.jpg");     // TextureImage0
-    LoadTextureImage("../../data/textures/bola2.jpg");      // TextureImage1
+    LoadTextureImage("../../data/textures/bola.jpg");      // TextureImage1
     LoadTextureImage("../../data/textures/field.jpeg");     // TextureImage2
     LoadTextureImage("../../data/textures/chao.jpg");       // TextureImage3
     LoadTextureImage("../../data/textures/player.jpg");     // TextureImage4
@@ -556,6 +555,14 @@ int main(int argc, char* argv[])
         #define CIRCLE 23
         #define SUN 24
 
+                // coords dos planos
+        // x = 11 (goleiro)
+        // x = 6 (cerca)
+        // x = 94
+        // z = 28
+        // z = -28
+
+
         // Desenha Infinito
         model = Matrix_Translate(camera_position_c.x,camera_position_c.y,camera_position_c.z);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
@@ -567,10 +574,11 @@ int main(int argc, char* argv[])
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
 
+        // 0,4 circ
+        // 0,2 raio
         // Desenhamos o modelo da esfera
         model =
-             Matrix_Translate(23.7f -(float)glfwGetTime() * 0.2f,-0.2f,0.28f)
-            * Matrix_Scale(1.0f, 1.0f, 1.0f);
+             Matrix_Translate(23.7f -(float)glfwGetTime() * 0.2f,-0.2f,0.28f);
 
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, SPHERE);
@@ -578,6 +586,27 @@ int main(int argc, char* argv[])
         DrawVirtualObject("Object__Soccer_ballWhit_1");
         DrawVirtualObject("Object__Soccer_ballBlac_2");
         DrawVirtualObject("Object__Soccer_ballBlac_3");
+
+        // Configurar o plano
+        collisions::Plane plane;
+        plane.normal = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f); // Normal do plano (no eixo x)
+        plane.distance = 11.0f; // Distância do plano à origem (o plano passa pela origem)
+
+        // Parâmetros da esfera do seu código OpenGL
+        glm::vec4 sphereCenter = glm::vec4(23.7 -(float)glfwGetTime() * 0.2f,-0.2f,0.28f, 1.0f);
+        float sphereRadius = 0.2f; // Ajuste conforme necessário
+
+        // Configurar a esfera
+        collisions::Sphere sphere;
+        sphere.center = sphereCenter;
+        sphere.radius = sphereRadius;
+
+        // Verificar colisão
+        if (collisions::checkCollision(sphere, plane)) {
+            printf("A esfera está colidindo com o plano.");
+            break;
+        }
+
 
         // bezier cubica
         float bezier_speed = 0.45f;

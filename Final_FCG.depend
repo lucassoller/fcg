@@ -1627,7 +1627,7 @@
 	<inttypes.h>
 	<stdint.h>
 
-1723422684 source:c:\users\lucas\onedrive\햞ea de trabalho\fcg\src\main.cpp
+1723799070 source:c:\users\lucas\onedrive\햞ea de trabalho\fcg\src\main.cpp
 	<cmath>
 	<cstdio>
 	<cstdlib>
@@ -1649,6 +1649,7 @@
 	<stb_image.h>
 	"utils.h"
 	"matrices.h"
+	"collisions.h"
 
 1723328774 c:\users\lucas\onedrive\햞ea de trabalho\fcg\include\glfw\glfw3.h
 	<stddef.h>
@@ -2522,7 +2523,7 @@
 1723328780 c:\users\lucas\onedrive\햞ea de trabalho\fcg\include\utils.h
 	<cstdio>
 
-1723328780 c:\users\lucas\onedrive\햞ea de trabalho\fcg\include\matrices.h
+1723794363 c:\users\lucas\onedrive\햞ea de trabalho\fcg\include\matrices.h
 	<cstdio>
 	<cstdlib>
 	<glm/mat4x4.hpp>
@@ -3574,4 +3575,17 @@
 1723493595 c:\users\arthur\onedrive\documentos\ufrgs\fcg\trabalhofinal\include\glm\gtx\transform.inl
 
 1723501843 c:\users\arthur\onedrive\documentos\ufrgs\fcg\trabalhofinal\src\collisions.cpp
+
+1723788659 c:\users\lucas\onedrive\햞ea de trabalho\fcg\src\collisions.cpp
+	"collisions.h"
+	<algorithm>
+
+1723794461 source:c:\users\lucas\onedrive\햞ea de trabalho\fcg\src\collisions.cpp
+	"collisions.h"
+	<algorithm>
+
+1723799406 c:\users\lucas\onedrive\햞ea de trabalho\fcg\include\collisions.h
+	"glm/vec4.hpp"
+	"glm/vec3.hpp"
+	"glm/mat4x4.hpp"
 
