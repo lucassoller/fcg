@@ -656,6 +656,18 @@ int main(int argc, char* argv[])
         DrawVirtualObject("Object_Sport_Sum_Man_Rt_4");
         DrawVirtualObject("Object_Sport_Sum_Man_Rt_5");
 
+        // Parametros para colisao do jogador
+        glm::vec3 bbox_min4 = g_VirtualScene["Object_Sport_Sum_Man_Rt_4"].bbox_min;
+        glm::vec3 bbox_max4 = g_VirtualScene["Object_Sport_Sum_Man_Rt_4"].bbox_max;
+        glm::vec3 bbox_min5 = g_VirtualScene["Object_Sport_Sum_Man_Rt_5"].bbox_min;
+        glm::vec3 bbox_max5 = g_VirtualScene["Object_Sport_Sum_Man_Rt_5"].bbox_max;
+        // Verifica colisao do jogador com a bola
+        if (collisions::checkCollision(sphere, bbox_min4, bbox_max4, model) ||
+            collisions::checkCollision(sphere, bbox_min5, bbox_max5, model)) {
+            printf("A esfera está colidindo com o jogador.");
+        }
+
+
         // Desenhamos o plano do campo
         model = Matrix_Translate(0.0f,4.6f,0.0f)
                 * Matrix_Scale(0.01f,0.01f,0.01f);
