@@ -274,6 +274,9 @@ void main()
     // Termo especular utilizando o modelo de iluminação de Phong
     vec3 phong_specular_term  = Ks * I * pow(max(0, dot(r, v)), q); // PREENCH AQUI o termo especular de Phong
 
+    vec4 h = (v + l)/normalize(v + l);
+    vec3 blinn_phong = Ks * I * pow(max(0, dot(h, n)), q); //Blinn-Phong
+
     // NOTE: Se você quiser fazer o rendering de objetos transparentes, é
     // necessário:
     // 1) Habilitar a operação de "blending" de OpenGL logo antes de realizar o
