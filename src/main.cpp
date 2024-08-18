@@ -676,11 +676,116 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, SUN);
         DrawVirtualObject("the_sphere");
 
+                //condicional que movimenta o adversario
+        if(mov)
+        {
+            zgoal += 0.05f;
+            if(zgoal >= 3.0f){
+                mov = false;
+            }
+        }else{
+            zgoal -= 0.05f;
+            if(zgoal <= -3.0f){
+                mov = true;
+            }
+        }
+        // Desenhamos o modelo do goleiro
+        // x = 11.7, y = 1.05, z = -3 -> 3
+        model = Matrix_Translate(11.7f,1.05f,zgoal)
+            * Matrix_Rotate_Y(M_PI)
+            * Matrix_Scale(0.9f, 0.9f, 0.9f);
+
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, GOAL);
+        DrawVirtualObject("Object_TexMap_0");
+
         // Configurar o goleiro1
+        collisions::Cylinder cylinderGoal1;
+        cylinderGoal1.center = glm::vec4(11.7,0.0f,zgoal,1.0f);
+        cylinderGoal1.radius = 0.2f;
+        cylinderGoal1.height = 2.5f;
+
+        // Verificar colisão
+        if (collisions::checkCollision(cylinderGoal1, sphere)) {
+            printf("Goleiro pegou a bola fim de jogo.");
+           // break;
+        }
+
+        //condicional que movimenta o adversario2
+        if(mov2)
+        {
+            xgoal2 += 0.08f;
+            if(xgoal2 >= 50.0f){
+                yrotate2 = M_PI * 2;
+                mov2 = false;
+            }
+        }else{
+            xgoal2 -= 0.08f;
+            if(xgoal2 <= 27.0f){
+                yrotate2 = M_PI;
+                mov2 = true;
+            }
+        }
+        // Desenhamos o modelo do adversario2
+        // x = 27 -> 50, y = 1.05, z = 10
+        model = Matrix_Translate(xgoal2,1.05f,10.0f)
+            * Matrix_Rotate_Y(yrotate2)
+            * Matrix_Scale(0.9f, 0.9f, 0.9f);
+
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, GOAL2);
+        DrawVirtualObject("Object_TexMap_0");
+
+        // Configurar o adversario2
+        collisions::Cylinder cylinderGoal2;
+        cylinderGoal2.center = glm::vec4(xgoal2,0.0f,10.0f,1.0f);
+        cylinderGoal2.radius = 0.2f;
+        cylinderGoal2.height = 2.5f;
+
+        //condicional que movimenta o adversario3
+        if(mov3)
+        {
+            xgoal3 -= 0.08f;
+            zgoal3 -= 0.08f;
+            if(xgoal3 <= 37.0f){
+                yrotate3 = 3 * M_PI / 4;
+                mov3 = false;
+            }
+        }else{
+            xgoal3 += 0.08f;
+            zgoal3 += 0.08f;
+            if(xgoal3 >= 88.7f){
+                yrotate3 = -M_PI / 4;
+                mov3 = true;
+            }
+        }
+        // Desenhamos o modelo do adverario3
+        // x = 37 -> 88.7, y = 1.05, z = 25.8
+        model = Matrix_Translate(xgoal3,1.05f,zgoal3)
+            * Matrix_Rotate_Y(yrotate3)
+            * Matrix_Scale(0.9f, 0.9f, 0.9f);
+
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, GOAL3);
+        DrawVirtualObject("Object_TexMap_0");
+
+        // Configurar o adversario3
+        collisions::Cylinder cylinderGoal3;
+        cylinderGoal3.center = glm::vec4(xgoal3,0.0f,zgoal3,1.0f);
+        cylinderGoal3.radius = 0.2f;
+        cylinderGoal3.height = 2.5f;
+
+        // Configurar o jogador
         collisions::Cylinder cylinderPlayer;
         cylinderPlayer.center = glm::vec4(last_cam_pos.x,0.0f,last_cam_pos.z,1.0f);
         cylinderPlayer.radius = 0.3f;
         cylinderPlayer.height = 2.5f;
+
+        if (collisions::checkCollision(cylinderPlayer, cylinderGoal1) ||
+            collisions::checkCollision(cylinderPlayer, cylinderGoal2) ||
+            collisions::checkCollision(cylinderPlayer, cylinderGoal3)){
+                printf("GAME OVER");
+        }
 
         if(!tecla_V){
             // Verifica colisao do jogador com os planos
@@ -760,93 +865,6 @@ int main(int argc, char* argv[])
             glUniform1i(g_object_id_uniform, CONE);
             DrawVirtualObject("Object_street_cones1_texture_dirt1.jpg");
         }
-
-        //condicional que movimenta o adversario
-        if(mov)
-        {
-            zgoal += 0.05f;
-            if(zgoal >= 3.0f){
-                mov = false;
-            }
-        }else{
-            zgoal -= 0.05f;
-            if(zgoal <= -3.0f){
-                mov = true;
-            }
-        }
-        // Desenhamos o modelo do goleiro
-        // x = 11.7, y = 1.05, z = -3 -> 3
-        model = Matrix_Translate(11.7f,1.05f,zgoal)
-            * Matrix_Rotate_Y(M_PI)
-            * Matrix_Scale(0.9f, 0.9f, 0.9f);
-
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, GOAL);
-        DrawVirtualObject("Object_TexMap_0");
-
-        // Configurar o goleiro1
-        collisions::Cylinder cylinderGoal1;
-        cylinderGoal1.center = glm::vec4(11.7,0.0f,zgoal,1.0f);
-        cylinderGoal1.radius = 0.2f;
-        cylinderGoal1.height = 2.5f;
-
-        // Verificar colisão
-        if (collisions::checkCollision(cylinderGoal1, sphere)) {
-            printf("Goleiro pegou a bola fim de jogo.");
-           // break;
-        }
-
-        //condicional que movimenta o adversario2
-        if(mov2)
-        {
-            xgoal2 += 0.08f;
-            if(xgoal2 >= 50.0f){
-                yrotate2 = M_PI * 2;
-                mov2 = false;
-            }
-        }else{
-            xgoal2 -= 0.08f;
-            if(xgoal2 <= 27.0f){
-                yrotate2 = M_PI;
-                mov2 = true;
-            }
-        }
-        // Desenhamos o modelo do adversario2
-        // x = 27 -> 50, y = 1.05, z = 10
-        model = Matrix_Translate(xgoal2,1.05f,10.0f)
-            * Matrix_Rotate_Y(yrotate2)
-            * Matrix_Scale(0.9f, 0.9f, 0.9f);
-
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, GOAL2);
-        DrawVirtualObject("Object_TexMap_0");
-
-        //condicional que movimenta o adversario3
-        if(mov3)
-        {
-            xgoal3 -= 0.08f;
-            zgoal3 -= 0.08f;
-            if(xgoal3 <= 37.0f){
-                yrotate3 = 3 * M_PI / 4;
-                mov3 = false;
-            }
-        }else{
-            xgoal3 += 0.08f;
-            zgoal3 += 0.08f;
-            if(xgoal3 >= 88.7f){
-                yrotate3 = -M_PI / 4;
-                mov3 = true;
-            }
-        }
-        // Desenhamos o modelo do adverario3
-        // x = 37 -> 88.7, y = 1.05, z = 25.8
-        model = Matrix_Translate(xgoal3,1.05f,zgoal3)
-            * Matrix_Rotate_Y(yrotate3)
-            * Matrix_Scale(0.9f, 0.9f, 0.9f);
-
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, GOAL3);
-        DrawVirtualObject("Object_TexMap_0");
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
         // terceiro cubo.
