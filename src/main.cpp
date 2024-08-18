@@ -563,7 +563,6 @@ int main(int argc, char* argv[])
         }
 
         glm::mat4 model = Matrix_Identity(); // Transformação identidade de modelagem
-        glm::mat4 last_model = Matrix_Identity();
         // Enviamos as matrizes "view" e "projection" para a placa de vídeo
         // (GPU). Veja o arquivo "shader_vertex.glsl", onde estas são
         // efetivamente aplicadas em todos os pontos.
@@ -579,10 +578,8 @@ int main(int argc, char* argv[])
         #define GOAL  5
         #define GOAL2  6
         #define GOAL3  7
-        #define GOAL4  8
+        #define SUN 8
         #define CONE  9
-        #define CIRCLE 23
-        #define SUN 24
 
         // Desenha Infinito
         model = Matrix_Translate(camera_position_c.x,camera_position_c.y,camera_position_c.z);
@@ -676,7 +673,7 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, SUN);
         DrawVirtualObject("the_sphere");
 
-                //condicional que movimenta o adversario
+        //condicional que movimenta o adversario
         if(mov)
         {
             zgoal += 0.05f;
@@ -690,7 +687,6 @@ int main(int argc, char* argv[])
             }
         }
         // Desenhamos o modelo do goleiro
-        // x = 11.7, y = 1.05, z = -3 -> 3
         model = Matrix_Translate(11.7f,1.05f,zgoal)
             * Matrix_Rotate_Y(M_PI)
             * Matrix_Scale(0.9f, 0.9f, 0.9f);
@@ -727,7 +723,6 @@ int main(int argc, char* argv[])
             }
         }
         // Desenhamos o modelo do adversario2
-        // x = 27 -> 50, y = 1.05, z = 10
         model = Matrix_Translate(xgoal2,1.05f,10.0f)
             * Matrix_Rotate_Y(yrotate2)
             * Matrix_Scale(0.9f, 0.9f, 0.9f);
@@ -760,7 +755,6 @@ int main(int argc, char* argv[])
             }
         }
         // Desenhamos o modelo do adverario3
-        // x = 37 -> 88.7, y = 1.05, z = 25.8
         model = Matrix_Translate(xgoal3,1.05f,zgoal3)
             * Matrix_Rotate_Y(yrotate3)
             * Matrix_Scale(0.9f, 0.9f, 0.9f);
@@ -774,6 +768,117 @@ int main(int argc, char* argv[])
         cylinderGoal3.center = glm::vec4(xgoal3,0.0f,zgoal3,1.0f);
         cylinderGoal3.radius = 0.2f;
         cylinderGoal3.height = 2.5f;
+
+        // Configurar o cone1
+        collisions::Cylinder cylinderCone1;
+        cylinderCone1.center = glm::vec4(76.5f,0.0f,0.0f,1.0f);
+        cylinderCone1.radius = 0.6f;
+        cylinderCone1.height = 1.2f;
+
+        // Configurar o cone2
+        collisions::Cylinder cylinderCone2;
+        cylinderCone2.center = glm::vec4(76.5f,0.0f,1.5f,1.0f);
+        cylinderCone2.radius = 0.6f;
+        cylinderCone2.height = 1.2f;
+
+        // Configurar o cone3
+        collisions::Cylinder cylinderCone3;
+        cylinderCone3.center = glm::vec4(76.5f,0.0f,3.0f,1.0f);
+        cylinderCone3.radius = 0.6f;
+        cylinderCone3.height = 1.2f;
+
+        // Configurar o cone4
+        collisions::Cylinder cylinderCone4;
+        cylinderCone4.center = glm::vec4(76.5f,0.0f,-1.5f,1.0f);
+        cylinderCone4.radius = 0.6f;
+        cylinderCone4.height = 1.2f;
+
+        // Configurar o cone5
+        collisions::Cylinder cylinderCone5;
+        cylinderCone5.center = glm::vec4(76.5f,0.0f,-3.0f,1.0f);
+        cylinderCone5.radius = 0.6f;
+        cylinderCone5.height = 1.2f;
+
+        // Configurar o cone6
+        collisions::Cylinder cylinderCone6;
+        cylinderCone6.center = glm::vec4(50.0f,0.0f,20.0f,1.0f);
+        cylinderCone6.radius = 0.6f;
+        cylinderCone6.height = 1.2f;
+
+        // Configurar o cone7
+        collisions::Cylinder cylinderCone7;
+        cylinderCone7.center = glm::vec4(60.0f,0.0f,-15.0f,1.0f);
+        cylinderCone7.radius = 0.6f;
+        cylinderCone7.height = 1.2f;
+
+        // Configurar o cone8
+        collisions::Cylinder cylinderCone8;
+        cylinderCone8.center = glm::vec4(21.5f,0.0f,7.0f,1.0f);
+        cylinderCone8.radius = 0.6f;
+        cylinderCone8.height = 1.2f;
+
+        // Configurar o cone9
+        collisions::Cylinder cylinderCone9;
+        cylinderCone9.center = glm::vec4(18.0f,0.0f,-11.5f,1.0f);
+        cylinderCone9.radius = 0.6f;
+        cylinderCone9.height = 1.2f;
+
+        // Configurar o cone10
+        collisions::Cylinder cylinderCone10;
+        cylinderCone10.center = glm::vec4(35.0f,0.0f,-2.0f,1.0f);
+        cylinderCone10.radius = 0.6f;
+        cylinderCone10.height = 1.2f;
+
+        // Configurar o cone11
+        collisions::Cylinder cylinderCone11;
+        cylinderCone11.center = glm::vec4(28.0f,0.0f,17.0f,1.0f);
+        cylinderCone11.radius = 0.6f;
+        cylinderCone11.height = 1.2f;
+
+        // Configurar o cone12
+        collisions::Cylinder cylinderCone12;
+        cylinderCone12.center = glm::vec4(80.0f,0.0f,-19.0f,1.0f);
+        cylinderCone12.radius = 0.6f;
+        cylinderCone12.height = 1.2f;
+
+        // Configurar o cone13
+        collisions::Cylinder cylinderCone13;
+        cylinderCone13.center = glm::vec4(68.0f,0.0f,24.0f,1.0f);
+        cylinderCone13.radius = 0.6f;
+        cylinderCone13.height = 1.2f;
+
+        // Configurar o cone14
+        collisions::Cylinder cylinderCone14;
+        cylinderCone14.center = glm::vec4(58.0f,0.0f,14.0f,1.0f);
+        cylinderCone14.radius = 0.6f;
+        cylinderCone14.height = 1.2f;
+
+        glm::vec3 positions[] = {
+            glm::vec3(76.5f, 0.55f, 0.0f),
+            glm::vec3(76.5f, 0.55f, 1.5f),
+            glm::vec3(76.5f, 0.55f, 3.0f),
+            glm::vec3(76.5f, 0.55f, -1.5f),
+            glm::vec3(76.5f, 0.55f, -3.0f),
+            glm::vec3(50.0f, 0.55f, 20.0f),
+            glm::vec3(60.0f, 0.55f, -15.0f),
+            glm::vec3(21.5f, 0.55f, 7.0f),
+            glm::vec3(18.0f, 0.55f, -11.5f),
+            glm::vec3(35.0f, 0.55f, -2.0f),
+            glm::vec3(28.0f, 0.55f, 17.0f),
+            glm::vec3(80.0f, 0.55f, -19.0f),
+            glm::vec3(68.0f, 0.55f, 24.0f),
+            glm::vec3(58.0f, 0.55f, 14.0f),
+        };
+
+        for (int i = 0; i < 14; ++i) {
+            // Desenhamos o modelo do cone
+            model = Matrix_Translate(positions[i].x,0.55f,positions[i].z)
+                * Matrix_Scale(0.5f, 0.5f, 0.5f);
+
+            glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+            glUniform1i(g_object_id_uniform, CONE);
+            DrawVirtualObject("Object_street_cones1_texture_dirt1.jpg");
+        }
 
         // Configurar o jogador
         collisions::Cylinder cylinderPlayer;
@@ -792,7 +897,21 @@ int main(int argc, char* argv[])
             if (!collisions::checkCollision(cylinderPlayer, northPlane) &&
                 !collisions::checkCollision(cylinderPlayer, southPlane) &&
                 !collisions::checkCollision(cylinderPlayer, eastPlane) &&
-                !collisions::checkCollision(cylinderPlayer, westPlane)){
+                !collisions::checkCollision(cylinderPlayer, westPlane) &&
+                !collisions::checkCollision(cylinderPlayer, cylinderCone1) &&
+                !collisions::checkCollision(cylinderPlayer, cylinderCone2) &&
+                !collisions::checkCollision(cylinderPlayer, cylinderCone3) &&
+                !collisions::checkCollision(cylinderPlayer, cylinderCone4) &&
+                !collisions::checkCollision(cylinderPlayer, cylinderCone5) &&
+                !collisions::checkCollision(cylinderPlayer, cylinderCone6) &&
+                !collisions::checkCollision(cylinderPlayer, cylinderCone7) &&
+                !collisions::checkCollision(cylinderPlayer, cylinderCone8) &&
+                !collisions::checkCollision(cylinderPlayer, cylinderCone9) &&
+                !collisions::checkCollision(cylinderPlayer, cylinderCone10) &&
+                !collisions::checkCollision(cylinderPlayer, cylinderCone11) &&
+                !collisions::checkCollision(cylinderPlayer, cylinderCone12) &&
+                !collisions::checkCollision(cylinderPlayer, cylinderCone13) &&
+                !collisions::checkCollision(cylinderPlayer, cylinderCone14)){
 
                     // Desenhamos o modelo do jogador
                     model = Matrix_Translate(last_cam_pos.x,last_cam_pos.y,last_cam_pos.z)
@@ -838,33 +957,6 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, PLANE);
         DrawVirtualObject("the_plane");
-
-        glm::vec3 positions[] = {
-            glm::vec3(76.5f, 0.55f, 0.0f),
-            glm::vec3(76.5f, 0.55f, 1.5f),
-            glm::vec3(76.5f, 0.55f, 3.0f),
-            glm::vec3(76.5f, 0.55f, -1.5f),
-            glm::vec3(76.5f, 0.55f, -3.0f),
-            glm::vec3(50.0f, 0.55f, 20.0f),
-            glm::vec3(60.0f, 0.55f, -15.0f),
-            glm::vec3(21.5f, 0.55f, 7.0f),
-            glm::vec3(18.0f, 0.55f, -11.5f),
-            glm::vec3(35.0f, 0.55f, -2.0f),
-            glm::vec3(28.0f, 0.55f, 17.0f),
-            glm::vec3(80.0f, 0.55f, -19.0f),
-            glm::vec3(68.0f, 0.55f, 24.0f),
-            glm::vec3(58.0f, 0.55f, 14.0f),
-        };
-
-        for (int i = 0; i < 14; ++i) {
-            // Desenhamos o modelo do cone
-            model = Matrix_Translate(positions[i].x,0.55f,positions[i].z)
-                * Matrix_Scale(0.5f, 0.5f, 0.5f);
-
-            glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-            glUniform1i(g_object_id_uniform, CONE);
-            DrawVirtualObject("Object_street_cones1_texture_dirt1.jpg");
-        }
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
         // terceiro cubo.

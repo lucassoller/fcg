@@ -73,13 +73,10 @@ namespace collisions
         float u1 = u.x;
         float u2 = u.y;
         float u3 = u.z;
-        float u4 = u.w;
         float v1 = v.x;
         float v2 = v.y;
         float v3 = v.z;
-        float v4 = v.w;
 
         return u1*v1 + u2*v2 + u3*v3;
     }
-
 }

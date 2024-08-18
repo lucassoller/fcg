@@ -29,11 +29,9 @@ uniform mat4 projection;
 #define GOAL 5
 #define GOAL2  6
 #define GOAL3  7
-#define GOAL4  8
+#define SUN 8
 #define CONE 9
-#define CIRCLE 23
-#define SUN 24
-#define PLANE2 25
+
 
 uniform int object_id;
 
@@ -187,7 +185,7 @@ void main()
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage2
         Kd0 = texture(TextureImage2, vec2(U,V)).rgb;
     }
-    else if ( object_id == PLANE || object_id == PLANE2)
+    else if ( object_id == PLANE)
     {
         // Coordenadas de textura do plano, obtidas do arquivo OBJ.
         U = texcoords.x * 30;
@@ -208,7 +206,7 @@ void main()
         V = texcoords.y;
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage5
         Kd0 = texture(TextureImage5, vec2(U,V)).rgb;
-    }else if ( object_id == GOAL || object_id == GOAL2 || object_id == GOAL3 || object_id == GOAL4)
+    }else if ( object_id == GOAL || object_id == GOAL2 || object_id == GOAL3)
     {
         Ks = vec3(0.3,0.3,0.3);
         Ka = vec3(0.0,0.0,0.0);
@@ -218,14 +216,6 @@ void main()
         V = texcoords.y;
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage6
         Kd0 = texture(TextureImage6, vec2(U,V)).rgb;
-    }
-    else if ( object_id == CIRCLE )
-    {
-        Kd = vec3(0.5,0.5,0.0);
-        Ks = vec3(0.0,0.0,0.0);
-        Ka = vec3(0.0,0.0,0.0);
-        q = 1;
-        color.a = 0;
     }
     else if ( object_id == SKYSPHERE )
     {
@@ -296,9 +286,6 @@ void main()
 
     if(object_id == SKYSPHERE){
         color.rgb = Kd0 ;
-    }
-    else if(object_id == CIRCLE){
-        color.a = 0;
     }
     else{
         // Equação de Iluminação
