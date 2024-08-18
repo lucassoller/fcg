@@ -287,6 +287,10 @@ void main()
     if(object_id == SKYSPHERE){
         color.rgb = Kd0 ;
     }
+    else if(object_id == SUN){
+        float lambert = max(0,dot(n,l));
+        color.rgb = Kd0 * (lambert + ambient_term + blinn_phong);
+    }
     else{
         // Equação de Iluminação
         lambert_diffuse_term = Kd0 * I * max(0, dot(n, l));
