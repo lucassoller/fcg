@@ -396,10 +396,10 @@ int main(int argc, char* argv[])
     float x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
 
     glm::vec4 camera_position_c  = glm::vec4(3,3,3 ,1.0f);
-    float speed = 8.5f; // Velocidade da câmera
+    float speed = 5.0f; // Velocidade da câmera
     float prev_time = (float)glfwGetTime();
 
-    camera_position_c  = glm::vec4(x+50,y-3.8,z-3.5,1.0f); // Ponto "c", centro da câmera
+    camera_position_c  = glm::vec4(x+50,y-3.9,z-3.5,1.0f); // Ponto "c", centro da câmera
     glm::vec4 camera_lookat_l    = glm::vec4(0.0f,0.0f,0.0f,1.0f); // Ponto "l", para onde a câmera (look-at) estará sempre olhando
     glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
     glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
@@ -466,38 +466,21 @@ int main(int argc, char* argv[])
 
             // *** MOVIMENTACAO ***
             if (tecla_W_pressionada) {
-                float new_x = last_cam_pos.x - w.x * speed * delta_t;
-                float new_z = last_cam_pos.z - w.z * speed * delta_t;
-                if (new_x >= minX && new_x <= maxX && new_z >= minZ && new_z <= maxZ) {
-                    last_cam_pos.x = new_x;
-                    last_cam_pos.z = new_z;
-                }
+                last_cam_pos.x = last_cam_pos.x - w.x * speed * delta_t;
+                last_cam_pos.z = last_cam_pos.z - w.z * speed * delta_t;
             }
             if (tecla_A_pressionada) {
-                float new_x = last_cam_pos.x - u.x * speed * delta_t;
-                float new_z = last_cam_pos.z - u.z * speed * delta_t;
-                if (new_x >= minX && new_x <= maxX && new_z >= minZ && new_z <= maxZ) {
-                    last_cam_pos.x = new_x;
-                    last_cam_pos.z = new_z;
-                }
+                last_cam_pos.x = last_cam_pos.x - u.x * speed * delta_t;
+                last_cam_pos.z = last_cam_pos.z - u.z * speed * delta_t;
             }
             if (tecla_S_pressionada) {
-                float new_x = last_cam_pos.x + w.x * speed * delta_t;
-                float new_z = last_cam_pos.z + w.z * speed * delta_t;
-                if (new_x >= minX && new_x <= maxX && new_z >= minZ && new_z <= maxZ) {
-                    last_cam_pos.x = new_x;
-                    last_cam_pos.z = new_z;
-                }
+                last_cam_pos.x = last_cam_pos.x + w.x * speed * delta_t;
+                last_cam_pos.z = last_cam_pos.z + w.z * speed * delta_t;
             }
             if (tecla_D_pressionada) {
-                float new_x = last_cam_pos.x + u.x * speed * delta_t;
-                float new_z = last_cam_pos.z + u.z * speed * delta_t;
-                if (new_x >= minX && new_x <= maxX && new_z >= minZ && new_z <= maxZ) {
-                    last_cam_pos.x = new_x;
-                    last_cam_pos.z = new_z;
-                }
+                last_cam_pos.x = last_cam_pos.x + u.x * speed * delta_t;
+                last_cam_pos.z = last_cam_pos.z + u.z * speed * delta_t;
             }
-            aux_cam = last_cam_pos;
         }
         else{
             camera_position_c = aux_cam;
@@ -693,8 +676,33 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, SUN);
         DrawVirtualObject("the_sphere");
 
-        // Desenhamos o modelo do jogador
-        model = Matrix_Translate(last_cam_pos.x,last_cam_pos.y,last_cam_pos.z);
+        // Configurar o goleiro1
+        collisions::Cylinder cylinderPlayer;
+        cylinderPlayer.center = glm::vec4(last_cam_pos.x,0.0f,last_cam_pos.z,1.0f);
+        cylinderPlayer.radius = 0.3f;
+        cylinderPlayer.height = 2.5f;
+
+        if(!tecla_V){
+            // Verifica colisao do jogador com os planos
+            if (!collisions::checkCollision(cylinderPlayer, northPlane) &&
+                !collisions::checkCollision(cylinderPlayer, southPlane) &&
+                !collisions::checkCollision(cylinderPlayer, eastPlane) &&
+                !collisions::checkCollision(cylinderPlayer, westPlane)){
+
+                    // Desenhamos o modelo do jogador
+                    model = Matrix_Translate(last_cam_pos.x,last_cam_pos.y,last_cam_pos.z)
+                        * Matrix_Rotate_Y(0.65f)
+                        * Matrix_Scale(0.9f, 0.9f, 0.9f);
+
+                    aux_cam = last_cam_pos;
+            }else{
+                    last_cam_pos = aux_cam;
+                    // Desenhamos o modelo do jogador
+                    model = Matrix_Translate(last_cam_pos.x,last_cam_pos.y,last_cam_pos.z)
+                        * Matrix_Rotate_Y(0.65f)
+                        * Matrix_Scale(0.9f, 0.9f, 0.9f);
+            }
+        }
 
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, PLAYER);
@@ -705,35 +713,11 @@ int main(int argc, char* argv[])
         DrawVirtualObject("Object_Sport_Sum_Man_Rt_4");
         DrawVirtualObject("Object_Sport_Sum_Man_Rt_5");
 
-        // Parametros para colisao do jogador
-        glm::vec3 bbox_min4 = g_VirtualScene["Object_Sport_Sum_Man_Rt_4"].bbox_min;
-        glm::vec3 bbox_max4 = g_VirtualScene["Object_Sport_Sum_Man_Rt_4"].bbox_max;
-        glm::vec3 bbox_min5 = g_VirtualScene["Object_Sport_Sum_Man_Rt_5"].bbox_min;
-        glm::vec3 bbox_max5 = g_VirtualScene["Object_Sport_Sum_Man_Rt_5"].bbox_max;
-
-        // Verifica colisao do jogador com a bola
-        if (collisions::checkCollision(sphere, bbox_min4, bbox_max4, model) ||
-            collisions::checkCollision(sphere, bbox_min5, bbox_max5, model)) {
-            printf("A esfera está colidindo com o jogador.");
+        // Verificar colisão
+        if (collisions::checkCollision(cylinderPlayer, sphere)) {
+            printf("Goleiro pegou a bola fim de jogo.");
             colide = true;
-        }
-
-        // Verifica colisao do jogador com os planos
-        if (collisions::checkCollision(bbox_min4, bbox_max4, model, northPlane) ||
-            collisions::checkCollision(bbox_min5, bbox_max5, model, northPlane)){
-                printf("O jogador colidiu com o plano norte.");
-        }
-        if (collisions::checkCollision(bbox_min4, bbox_max4, model, southPlane) ||
-            collisions::checkCollision(bbox_min5, bbox_max5, model, southPlane)){
-                printf("O jogador colidiu com o plano sul.");
-        }
-        if (collisions::checkCollision(bbox_min4, bbox_max4, model, eastPlane) ||
-            collisions::checkCollision(bbox_min5, bbox_max5, model, eastPlane)){
-                printf("O jogador colidiu com o plano leste.");
-        }
-        if(collisions::checkCollision(bbox_min4, bbox_max4, model, westPlane) ||
-            collisions::checkCollision(bbox_min5, bbox_max5, model, westPlane)){
-                printf("O jogador colidiu com o plano oeste.");
+           // break;
         }
 
         // Desenhamos o plano do campo
@@ -863,15 +847,6 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, GOAL3);
         DrawVirtualObject("Object_TexMap_0");
-
-
-       /* // Desenhamos o circulo
-        model = Matrix_Translate(23.0f,0.0f,0.0f)
-            * Matrix_Rotate_X(M_PI);
-               // * Matrix_Scale(0.01f,0.01f,0.01f);
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, CIRCLE);
-        DrawVirtualObject("circle");*/
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
         // terceiro cubo.
