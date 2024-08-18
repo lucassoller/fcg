@@ -251,6 +251,8 @@ float zgoal3 = 25.8;
 float yrotate3 = -M_PI / 4;
 
 bool colide = false;
+static bool collisionStarted = false; // Indica se a colisão já foi detectada
+static float startTime = 0.0f; // Armazena o tempo de início da colisão
 
 // bezier cubica
 glm::vec4 bezier_cubic(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3, glm::vec4 p4, float t);
@@ -333,13 +335,13 @@ int main(int argc, char* argv[])
 
     // Carregamos duas imagens para serem utilizadas como textura
     LoadTextureImage("../../data/textures/skybox.jpg");     // TextureImage0
-    LoadTextureImage("../../data/textures/bola.jpg");      // TextureImage1
+    LoadTextureImage("../../data/textures/bola.jpg");       // TextureImage1
     LoadTextureImage("../../data/textures/field.jpeg");     // TextureImage2
     LoadTextureImage("../../data/textures/chao.jpg");       // TextureImage3
     LoadTextureImage("../../data/textures/player.jpg");     // TextureImage4
     LoadTextureImage("../../data/textures/cone.jpg");       // TextureImage5
     LoadTextureImage("../../data/textures/goal.jpg");       // TextureImage6
-    LoadTextureImage("../../data/textures/sol.jpg");       // TextureImage7
+    LoadTextureImage("../../data/textures/sol.jpg");        // TextureImage7
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/3d/sphere.obj");
@@ -357,10 +359,6 @@ int main(int argc, char* argv[])
     ObjModel planemodel("../../data/3d/plane.obj");
     ComputeNormals(&planemodel);
     BuildTrianglesAndAddToVirtualScene(&planemodel);
-
-    ObjModel planemodel2("../../data/3d/plane2.obj");
-    ComputeNormals(&planemodel2);
-    BuildTrianglesAndAddToVirtualScene(&planemodel2);
 
     ObjModel conemodel("../../data/3d/cone.obj");
     ComputeNormals(&conemodel);
@@ -595,10 +593,17 @@ int main(int argc, char* argv[])
         float xSphere = 23.7f;
 
         // Desenhamos o modelo da esfera
-        if(colide){
-            xSphere -= (float)glfwGetTime() * 0.3f;
+        if (colide) {
+            if (!collisionStarted) {
+                // A colisão foi detectada pela primeira vez
+                startTime = glfwGetTime();
+                collisionStarted = true;
+            }
+
+            float elapsedTime = glfwGetTime() - startTime;
+            xSphere -= elapsedTime * 2.5f;
         }
-        model = Matrix_Translate(xSphere,-0.2f,0.28f);
+        model = Matrix_Translate(xSphere,-0.18f,0.28f);
 
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, SPHERE);
@@ -638,7 +643,7 @@ int main(int argc, char* argv[])
         sphere.radius = 0.2f;
 
         // Verificar colisão
-        if (collisions::checkCollision(sphere, westPlane)) {
+        if (collisions::checkCollision(sphere, goalPlane)) {
             printf("GOOOOOL.");
            // break;
         }
@@ -939,7 +944,7 @@ int main(int argc, char* argv[])
 
         // Verificar colisão
         if (collisions::checkCollision(cylinderPlayer, sphere)) {
-            printf("Goleiro pegou a bola fim de jogo.");
+            printf("Jogador chutou a bola.");
             colide = true;
            // break;
         }
