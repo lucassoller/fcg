@@ -714,12 +714,12 @@ int main(int argc, char* argv[])
         if(!pause && !collisionPlayerGoal1){
             if(mov)
             {
-                zgoal += 0.05f;
+                zgoal += 0.01f;
                 if(zgoal >= 3.0f){
                     mov = false;
                 }
             }else{
-                zgoal -= 0.05f;
+                zgoal -= 0.01f;
                 if(zgoal <= -3.0f){
                     mov = true;
                 }
