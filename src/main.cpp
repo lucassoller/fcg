@@ -676,20 +676,20 @@ int main(int argc, char* argv[])
         }
 
         // bezier cubica
-        if(!pause){
-            float bezier_speed = 0.45f;
-            if(t_sun < 1.0f && !sun_back) {
-                t_sun += delta_t * bezier_speed;
-            }
-            else {
-                t_sun -= delta_t * bezier_speed;
-                sun_back = true;
-                if (t_sun<=0) {
-                    sun_back = false;
-                    t_sun = 0;
-                }
+
+        float bezier_speed = 0.45f;
+        if(t_sun < 1.0f && !sun_back) {
+            t_sun += delta_t * bezier_speed;
+        }
+        else {
+            t_sun -= delta_t * bezier_speed;
+            sun_back = true;
+            if (t_sun<=0) {
+                sun_back = false;
+                t_sun = 0;
             }
         }
+
 
         glm::vec4 p1 = glm::vec4(0.0f,15.0f,20.0f,1.0f);
         glm::vec4 p2 = glm::vec4(76.5f,15.0f,20.0f,1.0f);
@@ -744,7 +744,7 @@ int main(int argc, char* argv[])
         }
 
         //condicional que movimenta o adversario2
-        if(!pause && !collisionPlayerGoal2){
+        if(!collisionPlayerGoal2){
             if(mov2)
             {
                 xgoal2 += 0.08f;
@@ -770,7 +770,7 @@ int main(int argc, char* argv[])
         DrawVirtualObject("Object_TexMap_0");
 
         //condicional que movimenta o adversario3
-        if(!pause & !collisionPlayerGoal3){
+        if(!collisionPlayerGoal3){
             if(mov3)
             {
                 xgoal3 -= 0.08f;
