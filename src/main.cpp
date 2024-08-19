@@ -459,19 +459,19 @@ int main(int argc, char* argv[])
             u = u / norm(u);
 
             // *** MOVIMENTACAO ***
-            if (tecla_W_pressionada && !pause) {
+            if (tecla_W_pressionada) {
                 last_cam_pos.x = last_cam_pos.x - w.x * speed * delta_t;
                 last_cam_pos.z = last_cam_pos.z - w.z * speed * delta_t;
             }
-            if (tecla_A_pressionada && !pause) {
+            if (tecla_A_pressionada) {
                 last_cam_pos.x = last_cam_pos.x - u.x * speed * delta_t;
                 last_cam_pos.z = last_cam_pos.z - u.z * speed * delta_t;
             }
-            if (tecla_S_pressionada && !pause) {
+            if (tecla_S_pressionada) {
                 last_cam_pos.x = last_cam_pos.x + w.x * speed * delta_t;
                 last_cam_pos.z = last_cam_pos.z + w.z * speed * delta_t;
             }
-            if (tecla_D_pressionada && !pause) {
+            if (tecla_D_pressionada) {
                 last_cam_pos.x = last_cam_pos.x + u.x * speed * delta_t;
                 last_cam_pos.z = last_cam_pos.z + u.z * speed * delta_t;
             }
