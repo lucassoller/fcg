@@ -168,7 +168,7 @@ void main()
         // Veja também a Questão 4 do Questionário 4 no Moodle.
 
         Ks = vec3(0.3,0.3,0.3);
-        Ka = vec3(0.0,0.0,0.0);
+        Ka = vec3(0.5,0.5,0.5);
         q = 20.0;
 
         U = texcoords.x;
@@ -184,7 +184,7 @@ void main()
         V = texcoords.y;
         // Kd = vec3(0.2,0.2,0.2);
         Ks = vec3(0.3,0.3,0.3);
-        Ka = vec3(0.0,0.0,0.0);
+        Ka = vec3(0.2,0.2,0.2);
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage2
         Kd0 = texture(TextureImage2, vec2(U,V)).rgb;
     }
@@ -195,14 +195,14 @@ void main()
         V = texcoords.y * 30;
         // Kd = vec3(0.2,0.2,0.2);
         Ks = vec3(0.3,0.3,0.3);
-        Ka = vec3(0.0,0.0,0.0);
+        Ka = vec3(0.4,0.4,0.4);
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage3
         Kd0 = texture(TextureImage3, vec2(U,V)).rgb;
     }
     else if ( object_id >= CONE && object_id <= 22)
     {
         Ks = vec3(0.3,0.3,0.3);
-        Ka = vec3(0.0,0.0,0.0);
+        Ka = vec3(0.4,0.4,0.4);
         q = 20.0;
 
         U = texcoords.x;
@@ -212,7 +212,7 @@ void main()
     }else if ( object_id == GOAL || object_id == GOAL2 || object_id == GOAL3)
     {
         Ks = vec3(0.3,0.3,0.3);
-        Ka = vec3(0.0,0.0,0.0);
+        Ka = vec3(0.4,0.4,0.4);
         q = 20.0;
 
         U = texcoords.x;
@@ -291,13 +291,10 @@ void main()
         color.rgb = Kd0 ;
     }
     else if(object_id == SUN && gouraud){
-        float lambert = max(0,dot(n,l));
         color.rgb = Kd0 * color_v.rgb;
     }
     else{
         // Equação de Iluminação
-        lambert_diffuse_term = Kd0 * I * max(0, dot(n, l));
-        vec3 phong_specular_term  = Ks * I * pow(max(0, dot(r, v)), q);
         float lambert = max(0,dot(n,l));
         color.rgb = (Kd0 * (lambert + 0.01));
     }
