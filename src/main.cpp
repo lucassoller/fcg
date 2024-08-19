@@ -116,6 +116,7 @@ bool tecla_W_pressionada = false;
 bool tecla_A_pressionada = false;
 bool tecla_S_pressionada = false;
 bool tecla_D_pressionada = false;
+bool pause = false;
 bool tecla_V = false;
 
 // Declaração de funções utilizadas para pilha de matrizes de modelagem.
@@ -206,14 +207,6 @@ bool g_MiddleMouseButtonPressed = false; // Análogo para botão do meio do mous
 float g_CameraTheta = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
 float g_CameraPhi = 0.0f;   // Ângulo em relação ao eixo Y
 float g_CameraDistance = 3.5f; // Distância da câmera para a origem
-
-// Variáveis que controlam rotação do antebraço
-float g_ForearmAngleZ = 0.0f;
-float g_ForearmAngleX = 0.0f;
-
-// Variáveis que controlam translação do torso
-float g_TorsoPositionX = 0.0f;
-float g_TorsoPositionY = 0.0f;
 
 // Variável que controla o tipo de projeção utilizada: perspectiva ou ortográfica.
 bool g_UsePerspectiveProjection = true;
@@ -408,6 +401,7 @@ int main(int argc, char* argv[])
     float t_sun = 0.0f;
 
     bool gouraud = false;
+    float elapsedTime = 0.0f;
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -465,19 +459,19 @@ int main(int argc, char* argv[])
             u = u / norm(u);
 
             // *** MOVIMENTACAO ***
-            if (tecla_W_pressionada) {
+            if (tecla_W_pressionada && !pause) {
                 last_cam_pos.x = last_cam_pos.x - w.x * speed * delta_t;
                 last_cam_pos.z = last_cam_pos.z - w.z * speed * delta_t;
             }
-            if (tecla_A_pressionada) {
+            if (tecla_A_pressionada && !pause) {
                 last_cam_pos.x = last_cam_pos.x - u.x * speed * delta_t;
                 last_cam_pos.z = last_cam_pos.z - u.z * speed * delta_t;
             }
-            if (tecla_S_pressionada) {
+            if (tecla_S_pressionada && !pause) {
                 last_cam_pos.x = last_cam_pos.x + w.x * speed * delta_t;
                 last_cam_pos.z = last_cam_pos.z + w.z * speed * delta_t;
             }
-            if (tecla_D_pressionada) {
+            if (tecla_D_pressionada && !pause) {
                 last_cam_pos.x = last_cam_pos.x + u.x * speed * delta_t;
                 last_cam_pos.z = last_cam_pos.z + u.z * speed * delta_t;
             }
@@ -602,7 +596,10 @@ int main(int argc, char* argv[])
                 collisionStarted = true;
             }
 
-            float elapsedTime = glfwGetTime() - startTime;
+            if(!pause)
+            {
+                elapsedTime = glfwGetTime() - startTime;
+            }
             xSphere -= elapsedTime * 2.5f;
         }
         model = Matrix_Translate(xSphere,-0.18f,0.28f);
@@ -617,7 +614,7 @@ int main(int argc, char* argv[])
         // Configurar o plano do goleiro
         collisions::Plane goalPlane;
         goalPlane.normal = glm::vec4(1.0f, 0.0f, 0.0f,1.0f); // Normal do plano (no eixo x)
-        goalPlane.distance = 11.0f; // Distância do plano à origem (o plano passa pela origem)
+        goalPlane.distance = 10.8f; // Distância do plano à origem (o plano passa pela origem)
 
         // Configurar o plano oeste
         collisions::Plane westPlane;
@@ -644,23 +641,53 @@ int main(int argc, char* argv[])
         sphere.center = glm::vec4(xSphere,-0.2f,0.28f,1.0f);
         sphere.radius = 0.2f;
 
+        // Configurar o jogador
+        collisions::Cylinder cylinderPlayer;
+        cylinderPlayer.center = glm::vec4(last_cam_pos.x,0.0f,last_cam_pos.z,1.0f);
+        cylinderPlayer.radius = 0.35f;
+        cylinderPlayer.height = 2.5f;
+
+        // Configurar o goleiro1
+        collisions::Cylinder cylinderGoal1;
+        cylinderGoal1.center = glm::vec4(11.7,0.0f,zgoal,1.0f);
+        cylinderGoal1.radius = 0.2f;
+        cylinderGoal1.height = 2.5f;
+
+        // Configurar o adversario2
+        collisions::Cylinder cylinderGoal2;
+        cylinderGoal2.center = glm::vec4(xgoal2,0.0f,10.0f,1.0f);
+        cylinderGoal2.radius = 0.2f;
+        cylinderGoal2.height = 2.5f;
+
+        // Configurar o adversario3
+        collisions::Cylinder cylinderGoal3;
+        cylinderGoal3.center = glm::vec4(xgoal3,0.0f,zgoal3,1.0f);
+        cylinderGoal3.radius = 0.2f;
+        cylinderGoal3.height = 2.5f;
+
+        float collisionPlayerGoal1 = collisions::checkCollision(cylinderPlayer, cylinderGoal1);
+        float collisionPlayerGoal2 = collisions::checkCollision(cylinderPlayer, cylinderGoal2);
+        float collisionPlayerGoal3 = collisions::checkCollision(cylinderPlayer, cylinderGoal3);
+        float collisionPlayerSphere = collisions::checkCollision(cylinderPlayer, sphere);
+
         // Verificar colisão
         if (collisions::checkCollision(sphere, goalPlane)) {
-            printf("GOOOOOL.");
-           // break;
+            pause = true;
         }
 
         // bezier cubica
-        float bezier_speed = 0.45f;
-        if(t_sun < 1.0f && !sun_back) {
-            t_sun += delta_t * bezier_speed;
-        }
-        else {
-            t_sun -= delta_t * bezier_speed;
-            sun_back = true;
-            if (t_sun<=0) {
-                sun_back = false;
-                t_sun = 0;
+        if(!pause){
+            float bezier_speed = 0.45f;
+            if(t_sun < 1.0f && !sun_back) {
+                t_sun += delta_t * bezier_speed;
+            }
+            else {
+                t_sun -= delta_t * bezier_speed;
+                sun_back = true;
+                if (t_sun<=0) {
+                    sun_back = false;
+                    t_sun = 0;
+                }
             }
         }
 
@@ -684,16 +711,18 @@ int main(int argc, char* argv[])
         DrawVirtualObject("the_sphere");
 
         //condicional que movimenta o adversario
-        if(mov)
-        {
-            zgoal += 0.05f;
-            if(zgoal >= 3.0f){
-                mov = false;
-            }
-        }else{
-            zgoal -= 0.05f;
-            if(zgoal <= -3.0f){
-                mov = true;
+        if(!pause && !collisionPlayerGoal1){
+            if(mov)
+            {
+                zgoal += 0.05f;
+                if(zgoal >= 3.0f){
+                    mov = false;
+                }
+            }else{
+                zgoal -= 0.05f;
+                if(zgoal <= -3.0f){
+                    mov = true;
+                }
             }
         }
 
@@ -709,31 +738,26 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, GOAL);
         DrawVirtualObject("Object_TexMap_0");
 
-        // Configurar o goleiro1
-        collisions::Cylinder cylinderGoal1;
-        cylinderGoal1.center = glm::vec4(11.7,0.0f,zgoal,1.0f);
-        cylinderGoal1.radius = 0.2f;
-        cylinderGoal1.height = 2.5f;
-
         // Verificar colisão
         if (collisions::checkCollision(cylinderGoal1, sphere)) {
-            printf("Goleiro pegou a bola fim de jogo.");
-           // break;
+            pause = true;
         }
 
         //condicional que movimenta o adversario2
-        if(mov2)
-        {
-            xgoal2 += 0.08f;
-            if(xgoal2 >= 50.0f){
-                yrotate2 = M_PI * 2;
-                mov2 = false;
-            }
-        }else{
-            xgoal2 -= 0.08f;
-            if(xgoal2 <= 27.0f){
-                yrotate2 = M_PI;
-                mov2 = true;
+        if(!pause && !collisionPlayerGoal2){
+            if(mov2)
+            {
+                xgoal2 += 0.08f;
+                if(xgoal2 >= 50.0f){
+                    yrotate2 = M_PI * 2;
+                    mov2 = false;
+                }
+            }else{
+                xgoal2 -= 0.08f;
+                if(xgoal2 <= 27.0f){
+                    yrotate2 = M_PI;
+                    mov2 = true;
+                }
             }
         }
         // Desenhamos o modelo do adversario2
@@ -745,27 +769,23 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, GOAL2);
         DrawVirtualObject("Object_TexMap_0");
 
-        // Configurar o adversario2
-        collisions::Cylinder cylinderGoal2;
-        cylinderGoal2.center = glm::vec4(xgoal2,0.0f,10.0f,1.0f);
-        cylinderGoal2.radius = 0.2f;
-        cylinderGoal2.height = 2.5f;
-
         //condicional que movimenta o adversario3
-        if(mov3)
-        {
-            xgoal3 -= 0.08f;
-            zgoal3 -= 0.08f;
-            if(xgoal3 <= 37.0f){
-                yrotate3 = 3 * M_PI / 4;
-                mov3 = false;
-            }
-        }else{
-            xgoal3 += 0.08f;
-            zgoal3 += 0.08f;
-            if(xgoal3 >= 88.7f){
-                yrotate3 = -M_PI / 4;
-                mov3 = true;
+        if(!pause & !collisionPlayerGoal3){
+            if(mov3)
+            {
+                xgoal3 -= 0.08f;
+                zgoal3 -= 0.08f;
+                if(xgoal3 <= 37.0f){
+                    yrotate3 = 3 * M_PI / 4;
+                    mov3 = false;
+                }
+            }else{
+                xgoal3 += 0.08f;
+                zgoal3 += 0.08f;
+                if(xgoal3 >= 88.7f){
+                    yrotate3 = -M_PI / 4;
+                    mov3 = true;
+                }
             }
         }
         // Desenhamos o modelo do adverario3
@@ -776,12 +796,6 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, GOAL3);
         DrawVirtualObject("Object_TexMap_0");
-
-        // Configurar o adversario3
-        collisions::Cylinder cylinderGoal3;
-        cylinderGoal3.center = glm::vec4(xgoal3,0.0f,zgoal3,1.0f);
-        cylinderGoal3.radius = 0.2f;
-        cylinderGoal3.height = 2.5f;
 
         // Configurar o cone1
         collisions::Cylinder cylinderCone1;
@@ -894,18 +908,6 @@ int main(int argc, char* argv[])
             DrawVirtualObject("Object_street_cones1_texture_dirt1.jpg");
         }
 
-        // Configurar o jogador
-        collisions::Cylinder cylinderPlayer;
-        cylinderPlayer.center = glm::vec4(last_cam_pos.x,0.0f,last_cam_pos.z,1.0f);
-        cylinderPlayer.radius = 0.3f;
-        cylinderPlayer.height = 2.5f;
-
-        if (collisions::checkCollision(cylinderPlayer, cylinderGoal1) ||
-            collisions::checkCollision(cylinderPlayer, cylinderGoal2) ||
-            collisions::checkCollision(cylinderPlayer, cylinderGoal3)){
-                printf("GAME OVER");
-        }
-
         if(!tecla_V){
             // Verifica colisao do jogador com os planos
             if (!collisions::checkCollision(cylinderPlayer, northPlane) &&
@@ -925,7 +927,9 @@ int main(int argc, char* argv[])
                 !collisions::checkCollision(cylinderPlayer, cylinderCone11) &&
                 !collisions::checkCollision(cylinderPlayer, cylinderCone12) &&
                 !collisions::checkCollision(cylinderPlayer, cylinderCone13) &&
-                !collisions::checkCollision(cylinderPlayer, cylinderCone14)){
+                !collisions::checkCollision(cylinderPlayer, cylinderCone14) &&
+                !collisionPlayerGoal1 && !collisionPlayerGoal2 &&
+                !collisionPlayerGoal3 && !collisionPlayerSphere){
 
                     // Desenhamos o modelo do jogador
                     model = Matrix_Translate(last_cam_pos.x,last_cam_pos.y,last_cam_pos.z)
@@ -953,9 +957,7 @@ int main(int argc, char* argv[])
 
         // Verificar colisão
         if (collisions::checkCollision(cylinderPlayer, sphere)) {
-            printf("Jogador chutou a bola.");
             colide = true;
-           // break;
         }
 
         // Desenhamos o plano do campo
@@ -1642,38 +1644,6 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
         g_LastCursorPosX = xpos;
         g_LastCursorPosY = ypos;
     }
-
-    if (g_RightMouseButtonPressed)
-    {
-        // Deslocamento do cursor do mouse em x e y de coordenadas de tela!
-        float dx = xpos - g_LastCursorPosX;
-        float dy = ypos - g_LastCursorPosY;
-
-        // Atualizamos parâmetros da antebraço com os deslocamentos
-        g_ForearmAngleZ -= 0.01f*dx;
-        g_ForearmAngleX += 0.01f*dy;
-
-        // Atualizamos as variáveis globais para armazenar a posição atual do
-        // cursor como sendo a última posição conhecida do cursor.
-        g_LastCursorPosX = xpos;
-        g_LastCursorPosY = ypos;
-    }
-
-    if (g_MiddleMouseButtonPressed)
-    {
-        // Deslocamento do cursor do mouse em x e y de coordenadas de tela!
-        float dx = xpos - g_LastCursorPosX;
-        float dy = ypos - g_LastCursorPosY;
-
-        // Atualizamos parâmetros da antebraço com os deslocamentos
-        g_TorsoPositionX += 0.01f*dx;
-        g_TorsoPositionY -= 0.01f*dy;
-
-        // Atualizamos as variáveis globais para armazenar a posição atual do
-        // cursor como sendo a última posição conhecida do cursor.
-        g_LastCursorPosX = xpos;
-        g_LastCursorPosY = ypos;
-    }
 }
 
 // Função callback chamada sempre que o usuário movimenta a "rodinha" do mouse.
@@ -1743,10 +1713,6 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         g_AngleX = 0.0f;
         g_AngleY = 0.0f;
         g_AngleZ = 0.0f;
-        g_ForearmAngleX = 0.0f;
-        g_ForearmAngleZ = 0.0f;
-        g_TorsoPositionX = 0.0f;
-        g_TorsoPositionY = 0.0f;
     }
 
     // Se o usuário apertar a tecla P, utilizamos projeção perspectiva.
