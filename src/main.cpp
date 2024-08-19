@@ -231,6 +231,8 @@ GLint g_projection_uniform;
 GLint g_object_id_uniform;
 GLint g_bbox_min_uniform;
 GLint g_bbox_max_uniform;
+GLint g_gouraud_uniform;
+
 
 // Número de texturas carregadas pela função LoadTextureImage()
 GLuint g_NumLoadedTextures = 0;
@@ -406,6 +408,8 @@ int main(int argc, char* argv[])
 
     bool sun_back = false;
     float t_sun = 0.0f;
+
+    bool gouraud = false;
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -670,6 +674,9 @@ int main(int argc, char* argv[])
 
         bezier_c = bezier_cubic(p1, p2, p3, p4, t_sun);
 
+        gouraud = true;
+        glUniform1i(g_gouraud_uniform, gouraud);
+
         // Desenhamos o modelo da esfera
         model = Matrix_Translate( bezier_c.x,bezier_c.y,bezier_c.z)
             * Matrix_Scale(2.0f, 2.0f, 2.0f);
@@ -691,6 +698,10 @@ int main(int argc, char* argv[])
                 mov = true;
             }
         }
+
+        gouraud = false;
+        glUniform1i(g_gouraud_uniform, gouraud);
+
         // Desenhamos o modelo do goleiro
         model = Matrix_Translate(11.7f,1.05f,zgoal)
             * Matrix_Rotate_Y(M_PI)
@@ -1136,6 +1147,7 @@ void LoadShadersFromFiles()
     g_object_id_uniform  = glGetUniformLocation(g_GpuProgramID, "object_id"); // Variável "object_id" em shader_fragment.glsl
     g_bbox_min_uniform   = glGetUniformLocation(g_GpuProgramID, "bbox_min");
     g_bbox_max_uniform   = glGetUniformLocation(g_GpuProgramID, "bbox_max");
+    g_gouraud_uniform   = glGetUniformLocation(g_GpuProgramID, "gouraud");
 
     // Variáveis em "shader_fragment.glsl" para acesso das imagens de textura
     glUseProgram(g_GpuProgramID);

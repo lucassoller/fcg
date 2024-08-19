@@ -1,6 +1,7 @@
 #version 330 core
 
 // Atributos de fragmentos recebidos como entrada ("in") pelo Fragment Shader.
+in vec4 color_v;
 // Neste exemplo, este atributo foi gerado pelo rasterizador como a
 // interpolação da posição global e a normal de cada vértice, definidas em
 // "shader_vertex.glsl" e "main.cpp".
@@ -38,6 +39,8 @@ uniform int object_id;
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
 uniform vec4 bbox_min;
 uniform vec4 bbox_max;
+
+uniform bool gouraud;
 
 // Variáveis para acesso das imagens de textura
 uniform sampler2D TextureImage0;
@@ -287,9 +290,9 @@ void main()
     if(object_id == SKYSPHERE){
         color.rgb = Kd0 ;
     }
-    else if(object_id == SUN){
+    else if(object_id == SUN && gouraud){
         float lambert = max(0,dot(n,l));
-        color.rgb = Kd0 * (lambert + ambient_term + blinn_phong);
+        color.rgb = Kd0 * color_v.rgb;
     }
     else{
         // Equação de Iluminação
@@ -298,7 +301,6 @@ void main()
         float lambert = max(0,dot(n,l));
         color.rgb = (Kd0 * (lambert + 0.01));
     }
-
     // NOTE: Se você quiser fazer o rendering de objetos transparentes, é
     // necessário:
     // 1) Habilitar a operação de "blending" de OpenGL logo antes de realizar o
