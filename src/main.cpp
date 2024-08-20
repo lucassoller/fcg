@@ -203,7 +203,7 @@ bool g_MiddleMouseButtonPressed = false; // Análogo para botão do meio do mous
 // usuário através do mouse (veja função CursorPosCallback()). A posição
 // efetiva da câmera é calculada dentro da função main(), dentro do loop de
 // renderização.
-float g_CameraTheta = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
+float g_CameraTheta = M_PI/2; // Ângulo no plano ZX em relação ao eixo Z
 float g_CameraPhi = 0.0f;   // Ângulo em relação ao eixo Y
 float g_CameraDistance = 3.5f; // Distância da câmera para a origem
 
@@ -222,7 +222,6 @@ GLint g_object_id_uniform;
 GLint g_bbox_min_uniform;
 GLint g_bbox_max_uniform;
 GLint g_gouraud_uniform;
-
 
 // Número de texturas carregadas pela função LoadTextureImage()
 GLuint g_NumLoadedTextures = 0;
@@ -399,7 +398,7 @@ int main(int argc, char* argv[])
     float speed = 5.0f; // Velocidade da câmera
     float prev_time = (float)glfwGetTime();
 
-    camera_position_c  = glm::vec4(x+80,y-3.9,z-3.5,1.0f); // Ponto "c", centro da câmera
+    camera_position_c  = glm::vec4(x+76.5,y-3.9,z,1.0f); // Ponto "c", centro da câmera
     glm::vec4 camera_lookat_l    = glm::vec4(0.0f,0.0f,0.0f,1.0f); // Ponto "l", para onde a câmera (look-at) estará sempre olhando
     glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
     glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
@@ -485,7 +484,7 @@ int main(int argc, char* argv[])
         }
         else{
             camera_position_c = aux_cam;
-            camera_view_vector = glm::vec4(x,y,z,0.0f); // Vetor "view", sentido para onde a câmera está virada
+            camera_view_vector = -glm::vec4(x,y,z,0.0f); // Vetor "view", sentido para onde a câmera está virada
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f); // Vetor "up" fixado para apontar para o "céu" (eito Y global)
 
             glm::vec4 w = -camera_view_vector/* PREENCHA AQUI o cálculo do vetor w */;
@@ -2035,7 +2034,7 @@ void PrintObjModelInfo(ObjModel* model)
 // reseta as posições iniciais da camera, do jogador e da bola
 void resetPosition()
 {
-    g_CameraTheta = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
+    g_CameraTheta = M_PI/2; // Ângulo no plano ZX em relação ao eixo Z
     g_CameraPhi = 0.0f;   // Ângulo em relação ao eixo Y
     g_CameraDistance = 3.5f; // Distância da câmera para a origem
 
@@ -2045,7 +2044,7 @@ void resetPosition()
     z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
     x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
 
-    camera_position_c  = glm::vec4(x+80,y-3.9,z-3.5,1.0f); // Ponto "c", centro da câmera
+    camera_position_c  = glm::vec4(x+76.5,y-3.9,z,1.0f); // Ponto "c", centro da câmera
     last_cam_pos = camera_position_c;
     aux_cam = camera_position_c;
     gameOver = false;
