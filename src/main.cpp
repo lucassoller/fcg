@@ -140,9 +140,11 @@ void TextRendering_PrintMatrixVectorProduct(GLFWwindow* window, glm::mat4 M, glm
 void TextRendering_PrintMatrixVectorProductMoreDigits(GLFWwindow* window, glm::mat4 M, glm::vec4 v, float x, float y, float scale = 1.0f);
 void TextRendering_PrintMatrixVectorProductDivW(GLFWwindow* window, glm::mat4 M, glm::vec4 v, float x, float y, float scale = 1.0f);
 
-// Funções abaixo renderizam como texto na janela OpenGL algumas matrizes e
-// outras informações do programa. Definidas após main().
+// Funções abaixo renderizam como texto na janela OpenGL frames por segundo
+// teclas usadas no jogo e mensagens do jogo. Definidas após main().
 void TextRendering_ShowFramesPerSecond(GLFWwindow* window);
+void TextRendering_ShowGameMessages(GLFWwindow* window);
+void TextRendering_ShowKeyBinds(GLFWwindow* window);
 
 // Funções callback para comunicação com o sistema operacional e interação do
 // usuário. Veja mais comentários nas definições das mesmas, abaixo.
@@ -242,6 +244,9 @@ bool colide = false;
 static bool collisionStarted = false; // Indica se a colisão já foi detectada
 static float startTime = 0.0f; // Armazena o tempo de início da colisão
 float elapsedTime = 0.0f;
+
+bool gameOver = false;
+bool goal = false;
 
 // variaveis responsaveis pela camera
 float r;
@@ -675,6 +680,8 @@ int main(int argc, char* argv[])
         // Verificar colisão
         if (collisions::checkCollision(sphere, goalPlane)) {
             pause = true;
+            gameOver = true;
+            goal = true;
         }
 
         // bezier cubica
@@ -716,12 +723,12 @@ int main(int argc, char* argv[])
         if(!pause && !collisionPlayerGoal1){
             if(mov)
             {
-                zgoal += 0.01f;
+                zgoal += 0.03f;
                 if(zgoal >= 3.0f){
                     mov = false;
                 }
             }else{
-                zgoal -= 0.01f;
+                zgoal -= 0.03f;
                 if(zgoal <= -3.0f){
                     mov = true;
                 }
@@ -743,6 +750,7 @@ int main(int argc, char* argv[])
         // Verificar colisão
         if (collisions::checkCollision(cylinderGoal1, sphere)) {
             pause = true;
+            gameOver = true;
         }
 
         //condicional que movimenta o adversario2
@@ -975,6 +983,12 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, PLANE);
         DrawVirtualObject("the_plane");
+
+        // Imprimimos na tela mensagem de gol ou game over
+        TextRendering_ShowGameMessages(window);
+
+        // Imprimimos na tela informação sobre as teclas usadas
+        TextRendering_ShowKeyBinds(window);
 
         // Imprimimos na tela informação sobre o número de quadros renderizados
         // por segundo (frames per second).
@@ -1690,13 +1704,6 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         resetPosition();
     }
 
-
-    // Se o usuário apertar a tecla espaço, resetamos os ângulos de Euler para zero.
-    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
-    {
-
-    }
-
     // Se o usuário apertar a tecla P, utilizamos projeção perspectiva.
     if (key == GLFW_KEY_P && action == GLFW_PRESS)
     {
@@ -1784,6 +1791,40 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
 void ErrorCallback(int error, const char* description)
 {
     fprintf(stderr, "ERROR: GLFW: %s\n", description);
+}
+
+// Escrevemos na tela as teclas usadas no jogo
+void TextRendering_ShowKeyBinds(GLFWwindow* window)
+{
+    if ( !g_ShowInfoText )
+        return;
+
+    float pad = TextRendering_LineHeight(window);
+
+    TextRendering_PrintString(window, "WASD - mover personagem", -1.0f+pad/10, -1.0f+34*pad/10, 1.0f);
+    TextRendering_PrintString(window, "mouse - mover camera", -1.0f+pad/10, -1.0f+26*pad/10, 1.0f);
+    TextRendering_PrintString(window, "Z - resetar jogada", -1.0f+pad/10, -1.0f+18*pad/10, 1.0f);
+    TextRendering_PrintString(window, "V - alterar camera", -1.0f+pad/10, -1.0f+10*pad/10, 1.0f);
+    TextRendering_PrintString(window, "H - esconder texto", -1.0f+pad/10, -1.0f+2*pad/10, 1.0f);
+}
+
+// Escrevemos na tela mensagens de gol ou game over
+void TextRendering_ShowGameMessages(GLFWwindow* window)
+{
+    if ( !g_ShowInfoText )
+        return;
+
+    float pad = TextRendering_LineHeight(window);
+    float charwidth = TextRendering_CharWidth(window);
+
+    if(gameOver){
+        if(goal){
+            TextRendering_PrintString(window, "GOOOOOOOOOOOOOOOOOOOOOOOL", 1.0f-26*charwidth, -1.0f+2*pad/10, 1.0f);
+        }else{
+            TextRendering_PrintString(window, "GAME OVER", 1.0f-10*charwidth, -1.0f+10*pad/10, 1.0f);
+            TextRendering_PrintString(window, "O goleiro defendeu", 1.0f-19*charwidth, -1.0f+2*pad/10, 1.0f);
+        }
+    }
 }
 
 // Escrevemos na tela o número de quadros renderizados por segundo (frames per
@@ -1991,6 +2032,7 @@ void PrintObjModelInfo(ObjModel* model)
   }
 }
 
+// reseta as posições iniciais da camera, do jogador e da bola
 void resetPosition()
 {
     g_CameraTheta = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
@@ -2006,8 +2048,9 @@ void resetPosition()
     camera_position_c  = glm::vec4(x+80,y-3.9,z-3.5,1.0f); // Ponto "c", centro da câmera
     last_cam_pos = camera_position_c;
     aux_cam = camera_position_c;
+    gameOver = false;
+    goal = false;
     pause = false;
-
     colide = false;
     collisionStarted = false; // Indica se a colisão já foi detectada
     startTime = 0.0f;
