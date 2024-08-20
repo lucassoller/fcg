@@ -111,14 +111,6 @@ struct ObjModel
     }
 };
 
-
-bool tecla_W_pressionada = false;
-bool tecla_A_pressionada = false;
-bool tecla_S_pressionada = false;
-bool tecla_D_pressionada = false;
-bool pause = false;
-bool tecla_V = false;
-
 // Declaração de funções utilizadas para pilha de matrizes de modelagem.
 void PushMatrix(glm::mat4 M);
 void PopMatrix(glm::mat4& M);
@@ -150,7 +142,6 @@ void TextRendering_PrintMatrixVectorProductDivW(GLFWwindow* window, glm::mat4 M,
 
 // Funções abaixo renderizam como texto na janela OpenGL algumas matrizes e
 // outras informações do programa. Definidas após main().
-void TextRendering_ShowModelViewProjection(GLFWwindow* window, glm::mat4 projection, glm::mat4 view, glm::mat4 model, glm::vec4 p_model);
 void TextRendering_ShowFramesPerSecond(GLFWwindow* window);
 
 // Funções callback para comunicação com o sistema operacional e interação do
@@ -161,6 +152,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+void resetPosition();
 
 // Definimos uma estrutura que armazenará dados necessários para renderizar
 // cada objeto da cena virtual.
@@ -186,13 +178,18 @@ std::map<std::string, SceneObject> g_VirtualScene;
 // Pilha que guardará as matrizes de modelagem.
 std::stack<glm::mat4>  g_MatrixStack;
 
+#define M_PI   3.14159265358979323846
+
+bool tecla_W_pressionada = false;
+bool tecla_A_pressionada = false;
+bool tecla_S_pressionada = false;
+bool tecla_D_pressionada = false;
+bool tecla_Z_pressionada = false;
+bool pause = false;
+bool tecla_V = false;
+
 // Razão de proporção da janela (largura/altura). Veja função FramebufferSizeCallback().
 float g_ScreenRatio = 1.0f;
-
-// Ângulos de Euler que controlam a rotação de um dos cubos da cena virtual
-float g_AngleX = 0.0f;
-float g_AngleY = 0.0f;
-float g_AngleZ = 0.0f;
 
 // "g_LeftMouseButtonPressed = true" se o usuário está com o botão esquerdo do mouse
 // pressionado no momento atual. Veja função MouseButtonCallback().
@@ -228,8 +225,6 @@ GLint g_gouraud_uniform;
 // Número de texturas carregadas pela função LoadTextureImage()
 GLuint g_NumLoadedTextures = 0;
 
-#define M_PI   3.14159265358979323846
-
 // valores e coordenadas iniciais dos adversarios
 bool mov = true;
 float zgoal = 0.0f;
@@ -246,6 +241,16 @@ float yrotate3 = -M_PI / 4;
 bool colide = false;
 static bool collisionStarted = false; // Indica se a colisão já foi detectada
 static float startTime = 0.0f; // Armazena o tempo de início da colisão
+float elapsedTime = 0.0f;
+
+// variaveis responsaveis pela camera
+float r;
+float y;
+float z;
+float x;
+glm::vec4 camera_position_c; // Ponto "c", centro da câmera
+glm::vec4 last_cam_pos;
+glm::vec4 aux_cam;
 
 // bezier cubica
 glm::vec4 bezier_cubic(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3, glm::vec4 p4, float t);
@@ -381,12 +386,11 @@ int main(int argc, char* argv[])
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    float r = g_CameraDistance;
-    float y = r*sin(g_CameraPhi) + 5.0;
-    float z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
-    float x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
+    r = g_CameraDistance;
+    y = r*sin(g_CameraPhi) + 5.0;
+    z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
+    x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
 
-    glm::vec4 camera_position_c  = glm::vec4(3,3,3 ,1.0f);
     float speed = 5.0f; // Velocidade da câmera
     float prev_time = (float)glfwGetTime();
 
@@ -394,14 +398,12 @@ int main(int argc, char* argv[])
     glm::vec4 camera_lookat_l    = glm::vec4(0.0f,0.0f,0.0f,1.0f); // Ponto "l", para onde a câmera (look-at) estará sempre olhando
     glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
     glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
-    glm::vec4 last_cam_pos = camera_position_c;
-    glm::vec4 aux_cam = camera_position_c;
-
-    bool sun_back = false;
-    float t_sun = 0.0f;
+    last_cam_pos = camera_position_c;
+    aux_cam = camera_position_c;
 
     bool gouraud = false;
-    float elapsedTime = 0.0f;
+    bool sun_back = false;
+    float t_sun = 0.0f;
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -1678,41 +1680,21 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
 
-    // O código abaixo implementa a seguinte lógica:
-    //   Se apertar tecla X       então g_AngleX += delta;
-    //   Se apertar tecla shift+X então g_AngleX -= delta;
-    //   Se apertar tecla Y       então g_AngleY += delta;
-    //   Se apertar tecla shift+Y então g_AngleY -= delta;
-    //   Se apertar tecla Z       então g_AngleZ += delta;
-    //   Se apertar tecla shift+Z então g_AngleZ -= delta;
-
-    float delta = 3.141592 / 16; // 22.5 graus, em radianos.
-
-    if (key == GLFW_KEY_X && action == GLFW_PRESS)
-    {
-        g_AngleX += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
-    }
-
-    if (key == GLFW_KEY_Y && action == GLFW_PRESS)
-    {
-        g_AngleY += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
-    }
-    if (key == GLFW_KEY_Z && action == GLFW_PRESS)
-    {
-        g_AngleZ += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
-    }
-
     if (key == GLFW_KEY_V && action == GLFW_PRESS)
     {
         tecla_V = !tecla_V;
     }
 
+    if (key == GLFW_KEY_Z && action == GLFW_PRESS)
+    {
+        resetPosition();
+    }
+
+
     // Se o usuário apertar a tecla espaço, resetamos os ângulos de Euler para zero.
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
     {
-        g_AngleX = 0.0f;
-        g_AngleY = 0.0f;
-        g_AngleZ = 0.0f;
+
     }
 
     // Se o usuário apertar a tecla P, utilizamos projeção perspectiva.
@@ -1802,68 +1784,6 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
 void ErrorCallback(int error, const char* description)
 {
     fprintf(stderr, "ERROR: GLFW: %s\n", description);
-}
-
-// Esta função recebe um vértice com coordenadas de modelo p_model e passa o
-// mesmo por todos os sistemas de coordenadas armazenados nas matrizes model,
-// view, e projection; e escreve na tela as matrizes e pontos resultantes
-// dessas transformações.
-void TextRendering_ShowModelViewProjection(
-    GLFWwindow* window,
-    glm::mat4 projection,
-    glm::mat4 view,
-    glm::mat4 model,
-    glm::vec4 p_model
-)
-{
-    if ( !g_ShowInfoText )
-        return;
-
-    glm::vec4 p_world = model*p_model;
-    glm::vec4 p_camera = view*p_world;
-    glm::vec4 p_clip = projection*p_camera;
-    glm::vec4 p_ndc = p_clip / p_clip.w;
-
-    float pad = TextRendering_LineHeight(window);
-
-    TextRendering_PrintString(window, " Model matrix             Model     In World Coords.", -1.0f, 1.0f-pad, 1.0f);
-    TextRendering_PrintMatrixVectorProduct(window, model, p_model, -1.0f, 1.0f-2*pad, 1.0f);
-
-    TextRendering_PrintString(window, "                                        |  ", -1.0f, 1.0f-6*pad, 1.0f);
-    TextRendering_PrintString(window, "                            .-----------'  ", -1.0f, 1.0f-7*pad, 1.0f);
-    TextRendering_PrintString(window, "                            V              ", -1.0f, 1.0f-8*pad, 1.0f);
-
-    TextRendering_PrintString(window, " View matrix              World     In Camera Coords.", -1.0f, 1.0f-9*pad, 1.0f);
-    TextRendering_PrintMatrixVectorProduct(window, view, p_world, -1.0f, 1.0f-10*pad, 1.0f);
-
-    TextRendering_PrintString(window, "                                        |  ", -1.0f, 1.0f-14*pad, 1.0f);
-    TextRendering_PrintString(window, "                            .-----------'  ", -1.0f, 1.0f-15*pad, 1.0f);
-    TextRendering_PrintString(window, "                            V              ", -1.0f, 1.0f-16*pad, 1.0f);
-
-    TextRendering_PrintString(window, " Projection matrix        Camera                    In NDC", -1.0f, 1.0f-17*pad, 1.0f);
-    TextRendering_PrintMatrixVectorProductDivW(window, projection, p_camera, -1.0f, 1.0f-18*pad, 1.0f);
-
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-
-    glm::vec2 a = glm::vec2(-1, -1);
-    glm::vec2 b = glm::vec2(+1, +1);
-    glm::vec2 p = glm::vec2( 0,  0);
-    glm::vec2 q = glm::vec2(width, height);
-
-    glm::mat4 viewport_mapping = Matrix(
-        (q.x - p.x)/(b.x-a.x), 0.0f, 0.0f, (b.x*p.x - a.x*q.x)/(b.x-a.x),
-        0.0f, (q.y - p.y)/(b.y-a.y), 0.0f, (b.y*p.y - a.y*q.y)/(b.y-a.y),
-        0.0f , 0.0f , 1.0f , 0.0f ,
-        0.0f , 0.0f , 0.0f , 1.0f
-    );
-
-    TextRendering_PrintString(window, "                                                       |  ", -1.0f, 1.0f-22*pad, 1.0f);
-    TextRendering_PrintString(window, "                            .--------------------------'  ", -1.0f, 1.0f-23*pad, 1.0f);
-    TextRendering_PrintString(window, "                            V                           ", -1.0f, 1.0f-24*pad, 1.0f);
-
-    TextRendering_PrintString(window, " Viewport matrix           NDC      In Pixel Coords.", -1.0f, 1.0f-25*pad, 1.0f);
-    TextRendering_PrintMatrixVectorProductMoreDigits(window, viewport_mapping, p_ndc, -1.0f, 1.0f-26*pad, 1.0f);
 }
 
 // Escrevemos na tela o número de quadros renderizados por segundo (frames per
@@ -2069,6 +1989,29 @@ void PrintObjModelInfo(ObjModel* model)
     }
     printf("\n");
   }
+}
+
+void resetPosition()
+{
+    g_CameraTheta = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
+    g_CameraPhi = 0.0f;   // Ângulo em relação ao eixo Y
+    g_CameraDistance = 3.5f; // Distância da câmera para a origem
+
+    // variaveis responsaveis pela camera
+    r = g_CameraDistance;
+    y = r*sin(g_CameraPhi) + 5.0;
+    z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
+    x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
+
+    camera_position_c  = glm::vec4(x+80,y-3.9,z-3.5,1.0f); // Ponto "c", centro da câmera
+    last_cam_pos = camera_position_c;
+    aux_cam = camera_position_c;
+    pause = false;
+
+    colide = false;
+    collisionStarted = false; // Indica se a colisão já foi detectada
+    startTime = 0.0f;
+    elapsedTime = 0.0f;
 }
 
 // set makeprg=cd\ ..\ &&\ make\ run\ >/dev/null
