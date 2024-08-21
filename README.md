@@ -38,8 +38,8 @@ Ferramentas externas como ChatGPT ou opções similares foram utilizadas para pe
 Utilizamos algumas fontes disponíveis no moodle para realização do teste de colisões
 
 ## Contribuições no projeto
-- **Lucas Soller da Silva:** Pesquisa dos objetos 3D utilizados no projeto; Carregamento dos objetos e posicionamento; Animações de movimentação; Colisões; Ajuste de câmera
-- **:**
+- **Lucas Soller da Silva:** Pesquisa dos objetos 3D utilizados no projeto; Carregamento dos objetos e posicionamento; Animações de movimentação; Colisões; Ajuste de câmera; Iluminação Difusa; Mapeamento de Texturas; Modelo de Interpolação de Phong; Câmera look-at e Câmera livre; Transformações geométricas de objetos virtuais;
+- **Arthur Calazans de Camargo:** Posicionamento de objetos; Animações de movimento; Iluminação Difusa e de Blinn-Phong; Interpolação de Gouraud;  Mapeamento de Texturas;  Modelo de Interpolação de Phong; Curvas de Bézier; Câmera look-at e Câmera livre; Aplicação de Teste de Colisão; Transformações geométricas de objetos virtuais;
 
 ## Bibliotecas utilizadas
 - OpenGL
