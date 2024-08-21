@@ -50,3 +50,4 @@ Utilizamos algumas fontes disponíveis no moodle para realização do teste de c
 - Nenhuma biblioteca adicional foi utilizada
 
 ## Compilação e execução do projeto
+- Utilizamos o CodeBlocks para compilar e, assim, rodar nossa aplicação ou você pode rodar o executável seguindo a pasta bin/Release/main.exe
