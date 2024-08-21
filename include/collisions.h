@@ -4,6 +4,10 @@
 #include "glm/vec3.hpp"
 #include "glm/mat4x4.hpp"
 
+// FONTE: https://www.realtimerendering.com/intersections.html
+// FONTE: https://realtimecollisiondetection.net/books/rtcd/
+
+// Header responsavel pelo teste das colisões
 namespace collisions {
 
     struct Cylinder {
@@ -27,6 +31,5 @@ namespace collisions {
     bool checkCollision(const Cylinder& cylinder1, const Cylinder& cylinder2);
     bool checkCollision(const Sphere& sphere, const Plane& plane);
     float dotproduct(glm::vec4 u, glm::vec4 v);
-
 }
 

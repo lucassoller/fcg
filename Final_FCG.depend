@@ -1627,7 +1627,7 @@
 	<inttypes.h>
 	<stdint.h>
 
-1724125110 source:c:\users\lucas\onedrive\햞ea de trabalho\fcg\src\main.cpp
+1724198007 source:c:\users\lucas\onedrive\햞ea de trabalho\fcg\src\main.cpp
 	<cmath>
 	<cstdio>
 	<cstdlib>
@@ -3595,4 +3595,112 @@
 	"glm/vec4.hpp"
 	"glm/vec3.hpp"
 	"glm/mat4x4.hpp"
+
+1724196548 source:c:\users\lucas\onedrive\햞ea de trabalho\fcg\src\soundplayer.cpp
+	<cstdlib>
+	<cstdio>
+	<miniaudio/miniaudio.h>
+
+1724194639 c:\users\lucas\onedrive\햞ea de trabalho\fcg\include\soundplayer.h
+
+1723000481 c:\users\lucas\onedrive\햞ea de trabalho\fcg\include\miniaudio\miniaudio.h
+	"miniaudio.h"
+	"miniaudio.h"
+	<stddef.h>
+	<stdint.h>
+	<pthread.h>
+	<stdalign.h>
+	<stdarg.h>
+	<assert.h>
+	<limits.h>
+	<math.h>
+	<stdlib.h>
+	<string.h>
+	<stdarg.h>
+	<stdio.h>
+	<strings.h>
+	<wchar.h>
+	<float.h>
+	<windows.h>
+	<sched.h>
+	<sys/time.h>
+	<pthread.h>
+	<time.h>
+	<sys/stat.h>
+	<emscripten/emscripten.h>
+	<stdint.h>
+	<immintrin.h>
+	<emmintrin.h>
+	<arm_neon.h>
+	<intrin.h>
+	<sys/system_properties.h>
+	<errno.h>
+	<android/log.h>
+	<intrin.h>
+	<dlfcn.h>
+	<mach/mach_time.h>
+	<sys/types.h>
+	<unistd.h>
+	<dlfcn.h>
+	<audioclient.h>
+	<mmdeviceapi.h>
+	<poll.h>
+	<sys/eventfd.h>
+	<alsa/asoundlib.h>
+	<errno.h>
+	<pulse/pulseaudio.h>
+	<jack/jack.h>
+	<TargetConditionals.h>
+	<CoreAudio/CoreAudio.h>
+	<AVFoundation/AVFoundation.h>
+	<AudioToolbox/AudioToolbox.h>
+	<fcntl.h>
+	<sys/audioio.h>
+	<sys/soundcard.h>
+	<fcntl.h>
+	<poll.h>
+	<errno.h>
+	<sys/stat.h>
+	<sys/types.h>
+	<sys/ioctl.h>
+	<sys/audioio.h>
+	<sys/param.h>
+	<sys/ioctl.h>
+	<unistd.h>
+	<fcntl.h>
+	<sys/soundcard.h>
+	<SLES/OpenSLES.h>
+	<SLES/OpenSLES_Android.h>
+	<emscripten/emscripten.h>
+	<emscripten/webaudio.h>
+	<stddef.h>
+	<stddef.h>
+	<stddef.h>
+	<stdlib.h>
+	<string.h>
+	<limits.h>
+	<stdio.h>
+	<wchar.h>
+	<assert.h>
+	<endian.h>
+	<stdlib.h>
+	<string.h>
+	<smmintrin.h>
+	<emmintrin.h>
+	<arm_neon.h>
+	<intrin.h>
+	<assert.h>
+	<intrinsics.h>
+	<intrin.h>
+	<stdio.h>
+	<wchar.h>
+	<stdlib.h>
+	<string.h>
+	<limits.h>
+	<intrin.h>
+	<emmintrin.h>
+	<arm_neon.h>
+	<assert.h>
+	<stdio.h>
+	<wchar.h>
 

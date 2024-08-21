@@ -45,14 +45,13 @@
 
 // Headers da biblioteca para carregar modelos obj
 #include <tiny_obj_loader.h>
-
 #include <stb_image.h>
 
 // Headers locais, definidos na pasta "include/"
 #include "utils.h"
 #include "matrices.h"
-
 #include "collisions.h"
+
 // Estrutura que representa um modelo geométrico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
 struct ObjModel
@@ -122,23 +121,23 @@ void ComputeNormals(ObjModel* model); // Computa normais de um ObjModel, caso n�
 void LoadShadersFromFiles(); // Carrega os shaders de vértice e fragmento, criando um programa de GPU
 void LoadTextureImage(const char* filename); // Função que carrega imagens de textura
 void DrawVirtualObject(const char* object_name); // Desenha um objeto armazenado em g_VirtualScene
+void LoadShader(const char* filename, GLuint shader_id); // Função utilizada pelas duas acima
+void PrintObjModelInfo(ObjModel*); // Função para debugging
 GLuint LoadShader_Vertex(const char* filename);   // Carrega um vertex shader
 GLuint LoadShader_Fragment(const char* filename); // Carrega um fragment shader
-void LoadShader(const char* filename, GLuint shader_id); // Função utilizada pelas duas acima
 GLuint CreateGpuProgram(GLuint vertex_shader_id, GLuint fragment_shader_id); // Cria um programa de GPU
-void PrintObjModelInfo(ObjModel*); // Função para debugging
 
 // Declaração de funções auxiliares para renderizar texto dentro da janela
 // OpenGL. Estas funções estão definidas no arquivo "textrendering.cpp".
 void TextRendering_Init();
-float TextRendering_LineHeight(GLFWwindow* window);
-float TextRendering_CharWidth(GLFWwindow* window);
 void TextRendering_PrintString(GLFWwindow* window, const std::string &str, float x, float y, float scale = 1.0f);
 void TextRendering_PrintMatrix(GLFWwindow* window, glm::mat4 M, float x, float y, float scale = 1.0f);
 void TextRendering_PrintVector(GLFWwindow* window, glm::vec4 v, float x, float y, float scale = 1.0f);
 void TextRendering_PrintMatrixVectorProduct(GLFWwindow* window, glm::mat4 M, glm::vec4 v, float x, float y, float scale = 1.0f);
 void TextRendering_PrintMatrixVectorProductMoreDigits(GLFWwindow* window, glm::mat4 M, glm::vec4 v, float x, float y, float scale = 1.0f);
 void TextRendering_PrintMatrixVectorProductDivW(GLFWwindow* window, glm::mat4 M, glm::vec4 v, float x, float y, float scale = 1.0f);
+float TextRendering_LineHeight(GLFWwindow* window);
+float TextRendering_CharWidth(GLFWwindow* window);
 
 // Funções abaixo renderizam como texto na janela OpenGL frames por segundo
 // teclas usadas no jogo e mensagens do jogo. Definidas após main().
@@ -154,6 +153,8 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+
+// Função que reseta a posição do jogador, bola e camera
 void resetPosition();
 
 // Definimos uma estrutura que armazenará dados necessários para renderizar
@@ -180,15 +181,35 @@ std::map<std::string, SceneObject> g_VirtualScene;
 // Pilha que guardará as matrizes de modelagem.
 std::stack<glm::mat4>  g_MatrixStack;
 
+// Pi
 #define M_PI   3.14159265358979323846
 
+// IDs dos obj virtuais
+#define SPHERE 0
+#define PLAYER  1
+#define FIELD  2
+#define SKYSPHERE 3
+#define PLANE  4
+#define GOAL  5
+#define GOAL2  6
+#define GOAL3  7
+#define SUN 8
+#define CONE  9
+
+// Variaveis que captam ação do teclado
 bool tecla_W_pressionada = false;
 bool tecla_A_pressionada = false;
 bool tecla_S_pressionada = false;
 bool tecla_D_pressionada = false;
 bool tecla_Z_pressionada = false;
-bool pause = false;
 bool tecla_V = false;
+
+// Variável que pausa a movimentação de alguns objetos
+bool pause = false;
+
+// Variaveis que controlam mensagens de gol e game over
+bool gameOver = false;
+bool goal = false;
 
 // Razão de proporção da janela (largura/altura). Veja função FramebufferSizeCallback().
 float g_ScreenRatio = 1.0f;
@@ -226,35 +247,34 @@ GLint g_gouraud_uniform;
 // Número de texturas carregadas pela função LoadTextureImage()
 GLuint g_NumLoadedTextures = 0;
 
-// valores e coordenadas iniciais dos adversarios
+// Valores e coordenadas iniciais do adversario1
 bool mov = true;
 float zgoal = 0.0f;
 
+// Valores e coordenadas iniciais do adversario2
 bool mov2 = true;
 float xgoal2 = 27.5f;
 float yrotate2 = M_PI;
 
+// Valores e coordenadas iniciais do adversario3
 bool mov3 = true;
 float xgoal3 = 88.8f;
 float zgoal3 = 25.8;
 float yrotate3 = -M_PI / 4;
 
-bool colide = false;
+bool colide = false; // Testa colisão da bola com jogador
 static bool collisionStarted = false; // Indica se a colisão já foi detectada
 static float startTime = 0.0f; // Armazena o tempo de início da colisão
 float elapsedTime = 0.0f;
 
-bool gameOver = false;
-bool goal = false;
-
-// variaveis responsaveis pela camera
+// Variaveis responsaveis pela camera
 float r;
 float y;
 float z;
 float x;
 glm::vec4 camera_position_c; // Ponto "c", centro da câmera
-glm::vec4 last_cam_pos;
-glm::vec4 aux_cam;
+glm::vec4 last_cam_pos; // Ultima posição da camera
+glm::vec4 aux_cam; // Variavel auxiliar da camera
 
 // bezier cubica
 glm::vec4 bezier_cubic(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3, glm::vec4 p4, float t);
@@ -390,6 +410,7 @@ int main(int argc, char* argv[])
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    // Coordenadas da camera
     r = g_CameraDistance;
     y = r*sin(g_CameraPhi) + 5.0;
     z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
@@ -398,6 +419,7 @@ int main(int argc, char* argv[])
     float speed = 5.0f; // Velocidade da câmera
     float prev_time = (float)glfwGetTime();
 
+    // Vetores da camera
     camera_position_c  = glm::vec4(x+76.5,y-3.9,z,1.0f); // Ponto "c", centro da câmera
     glm::vec4 camera_lookat_l    = glm::vec4(0.0f,0.0f,0.0f,1.0f); // Ponto "l", para onde a câmera (look-at) estará sempre olhando
     glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
@@ -451,6 +473,7 @@ int main(int argc, char* argv[])
         // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
         // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
 
+        // Tecla V altera era camera look at e camera livre
         if (!tecla_V){
             camera_position_c  = last_cam_pos + glm::vec4(x,y,z,0.0f); // Ponto "c", centro da câmera
             camera_lookat_l    = last_cam_pos; // Ponto "l", para onde a câmera (look-at) estará sempre olhando
@@ -483,7 +506,7 @@ int main(int argc, char* argv[])
             }
         }
         else{
-            camera_position_c = aux_cam;
+            camera_position_c = aux_cam; // Ponto "c", centro da câmera
             camera_view_vector = -glm::vec4(x,y,z,0.0f); // Vetor "view", sentido para onde a câmera está virada
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f); // Vetor "up" fixado para apontar para o "céu" (eito Y global)
 
@@ -569,23 +592,10 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(g_view_uniform       , 1 , GL_FALSE , glm::value_ptr(view));
         glUniformMatrix4fv(g_projection_uniform , 1 , GL_FALSE , glm::value_ptr(projection));
 
-        // Desenhamos os objetos da cena virtual
-        #define SPHERE 0
-        #define PLAYER  1
-        #define FIELD  2
-        #define SKYSPHERE 3
-        #define PLANE  4
-        #define GOAL  5
-        #define GOAL2  6
-        #define GOAL3  7
-        #define SUN 8
-        #define CONE  9
-
-        // Desenha Infinito
+        // Desenha Infinito ao redor da cena
         model = Matrix_Translate(camera_position_c.x,camera_position_c.y,camera_position_c.z);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, SKYSPHERE);
-
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
         DrawVirtualObject("the_sphere");
@@ -594,7 +604,7 @@ int main(int argc, char* argv[])
 
         float xSphere = 23.7f;
 
-        // Desenhamos o modelo da esfera
+        // Testa se a bola colidiu
         if (colide) {
             if (!collisionStarted) {
                 // A colisão foi detectada pela primeira vez
@@ -602,14 +612,16 @@ int main(int argc, char* argv[])
                 collisionStarted = true;
             }
 
+            // Se a cena não esta pausada, continua computando o tempo decorrido
             if(!pause)
             {
                 elapsedTime = glfwGetTime() - startTime;
             }
+            // Atualiza a coordenada X da bola
             xSphere -= elapsedTime * 2.5f;
         }
+        // Desenha a bola
         model = Matrix_Translate(xSphere,-0.18f,0.28f);
-
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, SPHERE);
         DrawVirtualObject("Object__Soccer_ballWhit_0");
@@ -671,20 +683,26 @@ int main(int argc, char* argv[])
         cylinderGoal3.radius = 0.2f;
         cylinderGoal3.height = 2.5f;
 
+        // Testa as colisões entre o jogador e os adversarios, o jogador e a bola e a bola e o plano do gol
         float collisionPlayerGoal1 = collisions::checkCollision(cylinderPlayer, cylinderGoal1);
         float collisionPlayerGoal2 = collisions::checkCollision(cylinderPlayer, cylinderGoal2);
         float collisionPlayerGoal3 = collisions::checkCollision(cylinderPlayer, cylinderGoal3);
         float collisionPlayerSphere = collisions::checkCollision(cylinderPlayer, sphere);
+        float collisionPlaneSphere = collisions::checkCollision(sphere, goalPlane);
 
-        // Verificar colisão
-        if (collisions::checkCollision(sphere, goalPlane)) {
+        // Testa a colisão do goleiro com a bola
+        if(collisionPlayerSphere){
+            colide = true;
+        }
+
+        // Testa a colisão da bola com o plano que fica na linha do gol
+        if (collisionPlaneSphere) {
             pause = true;
             gameOver = true;
             goal = true;
-        }
+       }
 
-        // bezier cubica
-
+        // Bezier cubica
         float bezier_speed = 0.45f;
         if(t_sun < 1.0f && !sun_back) {
             t_sun += delta_t * bezier_speed;
@@ -698,7 +716,6 @@ int main(int argc, char* argv[])
             }
         }
 
-
         glm::vec4 p1 = glm::vec4(0.0f,15.0f,20.0f,1.0f);
         glm::vec4 p2 = glm::vec4(76.5f,15.0f,20.0f,1.0f);
         glm::vec4 p3 = glm::vec4(0.0f,15.0f,-20.0f,1.0f);
@@ -710,15 +727,14 @@ int main(int argc, char* argv[])
         gouraud = true;
         glUniform1i(g_gouraud_uniform, gouraud);
 
-        // Desenhamos o modelo da esfera
+        // Desenhamos o modelo do sol
         model = Matrix_Translate( bezier_c.x,bezier_c.y,bezier_c.z)
             * Matrix_Scale(2.0f, 2.0f, 2.0f);
-
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, SUN);
         DrawVirtualObject("the_sphere");
 
-        //condicional que movimenta o adversario
+        //Condicional que movimenta o adversario
         if(!pause && !collisionPlayerGoal1){
             if(mov)
             {
@@ -746,7 +762,7 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, GOAL);
         DrawVirtualObject("Object_TexMap_0");
 
-        // Verificar colisão
+        // Testa colisão entre a bola e o goleiro
         if (collisions::checkCollision(cylinderGoal1, sphere)) {
             pause = true;
             gameOver = true;
@@ -890,6 +906,7 @@ int main(int argc, char* argv[])
         cylinderCone14.radius = 0.6f;
         cylinderCone14.height = 1.2f;
 
+        // Vetor de posições dos cones
         glm::vec3 positions[] = {
             glm::vec3(76.5f, 0.55f, 0.0f),
             glm::vec3(76.5f, 0.55f, 1.5f),
@@ -908,7 +925,7 @@ int main(int argc, char* argv[])
         };
 
         for (int i = 0; i < 14; ++i) {
-            // Desenhamos o modelo do cone
+            // Desenhamos os modelos dos cones
             model = Matrix_Translate(positions[i].x,0.55f,positions[i].z)
                 * Matrix_Scale(0.5f, 0.5f, 0.5f);
 
@@ -917,8 +934,9 @@ int main(int argc, char* argv[])
             DrawVirtualObject("Object_street_cones1_texture_dirt1.jpg");
         }
 
+        // Testa se está na camera look at
         if(!tecla_V){
-            // Verifica colisao do jogador com os planos
+            // Verifica colisao do jogador com os planos, cones, adversarios e a bola para impedir a movimentação
             if (!collisions::checkCollision(cylinderPlayer, northPlane) &&
                 !collisions::checkCollision(cylinderPlayer, southPlane) &&
                 !collisions::checkCollision(cylinderPlayer, eastPlane) &&
@@ -940,12 +958,15 @@ int main(int argc, char* argv[])
                 !collisionPlayerGoal1 && !collisionPlayerGoal2 &&
                 !collisionPlayerGoal3 && !collisionPlayerSphere){
 
-                    // Desenhamos o modelo do jogador
+                    // Desenhamos o modelo do jogador onde a camera esta apontada
                     model = Matrix_Translate(last_cam_pos.x,last_cam_pos.y,last_cam_pos.z)
                         * Matrix_Rotate_Y(0.65f)
                         * Matrix_Scale(0.9f, 0.9f, 0.9f);
 
+                    // Variavel auxiliar para guardar a posição da camera
                     aux_cam = last_cam_pos;
+
+            // Camera livre
             }else{
                     last_cam_pos = aux_cam;
                     // Desenhamos o modelo do jogador
@@ -955,6 +976,7 @@ int main(int argc, char* argv[])
             }
         }
 
+        // Continuação do modelo do jogador
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, PLAYER);
         DrawVirtualObject("Object__Soccer_ballWhit_0");
@@ -964,19 +986,14 @@ int main(int argc, char* argv[])
         DrawVirtualObject("Object_Sport_Sum_Man_Rt_4");
         DrawVirtualObject("Object_Sport_Sum_Man_Rt_5");
 
-        // Verificar colisão
-        if (collisions::checkCollision(cylinderPlayer, sphere)) {
-            colide = true;
-        }
-
-        // Desenhamos o plano do campo
+        // Desenhamos o campo de futebol
         model = Matrix_Translate(0.0f,4.6f,0.0f)
                 * Matrix_Scale(0.01f,0.01f,0.01f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, FIELD);
         DrawVirtualObject("field");
 
-        //Desenhamos o plano do chão
+        //Desenhamos o chão
         model = Matrix_Translate(25.0f,-0.1f,0.0f)
                 * Matrix_Scale(50.0f,1.0f,50.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
@@ -1015,6 +1032,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 
+// Função que calcula a bezier cubica
 glm::vec4 bezier_cubic(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3, glm::vec4 p4, float t){
     glm::vec4 c12 = p1 + t * (p2 - p1);
     glm::vec4 c23 = p2 + t * (p3 - p2);
@@ -1122,7 +1140,7 @@ void LoadShadersFromFiles()
     // "shader_fragment.glsl" estão fixados, sendo que assumimos a existência
     // da seguinte estrutura no sistema de arquivos:
     //
-    //    + FCG_Lab_01/
+    //    + Futebol_FCG/
     //    |
     //    +--+ bin/
     //    |  |
@@ -1693,11 +1711,13 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
 
+    // Se o usuário apertar a tecla V, altera entre camera look at e camera livre
     if (key == GLFW_KEY_V && action == GLFW_PRESS)
     {
         tecla_V = !tecla_V;
     }
 
+    // Se o usuário apertar a tecla Z, reseta as posições de alguns objetos
     if (key == GLFW_KEY_Z && action == GLFW_PRESS)
     {
         resetPosition();
@@ -1816,7 +1836,9 @@ void TextRendering_ShowGameMessages(GLFWwindow* window)
     float pad = TextRendering_LineHeight(window);
     float charwidth = TextRendering_CharWidth(window);
 
+    // Testa se a jogada acabou
     if(gameOver){
+        // Testa se foi gol ou se o goleiro pegou a bola
         if(goal){
             TextRendering_PrintString(window, "GOOOOOOOOOOOOOOOOOOOOOOOL", 1.0f-26*charwidth, -1.0f+2*pad/10, 1.0f);
         }else{
@@ -2031,14 +2053,14 @@ void PrintObjModelInfo(ObjModel* model)
   }
 }
 
-// reseta as posições iniciais da camera, do jogador e da bola
+// Reseta as posições iniciais da camera, do jogador e da bola
 void resetPosition()
 {
     g_CameraTheta = M_PI/2; // Ângulo no plano ZX em relação ao eixo Z
     g_CameraPhi = 0.0f;   // Ângulo em relação ao eixo Y
     g_CameraDistance = 3.5f; // Distância da câmera para a origem
 
-    // variaveis responsaveis pela camera
+    // Variaveis responsaveis pela camera
     r = g_CameraDistance;
     y = r*sin(g_CameraPhi) + 5.0;
     z = r*cos(g_CameraPhi)*cos(g_CameraTheta);

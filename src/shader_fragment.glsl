@@ -19,8 +19,6 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-
-
 // Identificador que define qual objeto está sendo desenhado no momento
 #define SPHERE 0
 #define PLAYER 1
@@ -32,7 +30,6 @@ uniform mat4 projection;
 #define GOAL3  7
 #define SUN 8
 #define CONE 9
-
 
 uniform int object_id;
 
@@ -98,6 +95,7 @@ void main()
     vec3 Kd0 = vec3(0.0,0.0,0.0);
     float epsilon = 0.0001;
 
+    // Testa se é o id da esfera
     if ( object_id == SPHERE )
     {
         // PREENCHA AQUI as coordenadas de textura da esfera, computadas com
@@ -127,6 +125,7 @@ void main()
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage1
         Kd0 = texture(TextureImage1, vec2(U,V)).rgb;
     }
+    // Testa se é o id do sol
     if ( object_id == SUN )
     {
         // PREENCHA AQUI as coordenadas de textura da esfera, computadas com
@@ -156,6 +155,7 @@ void main()
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage7
         Kd0 = texture(TextureImage7, vec2(U,V)).rgb;
     }
+    // Testa se é o id do jogador
     else if ( object_id == PLAYER )
     {
         // PREENCHA AQUI as coordenadas de textura do coelho, computadas com
@@ -177,6 +177,7 @@ void main()
         Kd0 = texture(TextureImage4, vec2(U,V)).rgb;
 
     }
+    // Testa se é o id do campo
     else if ( object_id == FIELD )
     {
         // Coordenadas de textura do plano, obtidas do arquivo OBJ.
@@ -188,6 +189,7 @@ void main()
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage2
         Kd0 = texture(TextureImage2, vec2(U,V)).rgb;
     }
+    // Testa se é o id do plano
     else if ( object_id == PLANE)
     {
         // Coordenadas de textura do plano, obtidas do arquivo OBJ.
@@ -199,6 +201,7 @@ void main()
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage3
         Kd0 = texture(TextureImage3, vec2(U,V)).rgb;
     }
+    // Testa se é o id de um dos cones
     else if ( object_id >= CONE && object_id <= 22)
     {
         Ks = vec3(0.3,0.3,0.3);
@@ -209,7 +212,9 @@ void main()
         V = texcoords.y;
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage5
         Kd0 = texture(TextureImage5, vec2(U,V)).rgb;
-    }else if ( object_id == GOAL || object_id == GOAL2 || object_id == GOAL3)
+    }
+    // Testa se é o id de um dos adversarios
+    else if ( object_id == GOAL || object_id == GOAL2 || object_id == GOAL3)
     {
         Ks = vec3(0.3,0.3,0.3);
         Ka = vec3(0.4,0.4,0.4);
@@ -220,6 +225,7 @@ void main()
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage6
         Kd0 = texture(TextureImage6, vec2(U,V)).rgb;
     }
+    // Testa se é o id da skysphere
     else if ( object_id == SKYSPHERE )
     {
         // PREENCHA AQUI as coordenadas de textura da esfera, computadas com
@@ -248,7 +254,6 @@ void main()
         V = (phi + (M_PI_2))/(M_PI);
         // Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
         Kd0 = texture(TextureImage0, vec2(U,V)).rgb;
-
     }
 
 
