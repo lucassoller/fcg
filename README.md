@@ -2,13 +2,13 @@
 Você como jogador de futebol deve evitar os obstáculos e adversários para chegar até a área do penalti e realizar aquele gol que ficará marcado na sua carreira.
 #
 Trabalho desenvolvido para a cadeira de Fundamentos de Computação Gráfica - 2024/1.
-#
+### Tela inicial do jogo
 ![image](https://github.com/user-attachments/assets/50a0d3e1-2556-4fd6-b433-f3bcb8f6a9e9)
-- Tela inicial do jogo
+### Jogador realizou um gol
 ![image](https://github.com/user-attachments/assets/7c09b77e-e694-4239-8f5f-b87121fce416)
-- Jogador realizou um gol
+### Câmera livre
 ![image](https://github.com/user-attachments/assets/fba807ae-3bc4-46d0-a7c3-24524f7c97ab)
-- Câmera livre
+
 
 ## Como jogar ?
 - **W, A, S, D :** movimentação do Jogador
