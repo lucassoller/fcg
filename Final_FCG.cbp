@@ -370,7 +370,6 @@
 		<Unit filename="include/stb_image.h" />
 		<Unit filename="include/tiny_obj_loader.h" />
 		<Unit filename="include/utils.h" />
-		<Unit filename="src/SoundPlayer.cpp" />
 		<Unit filename="src/collisions.cpp" />
 		<Unit filename="src/glad.c">
 			<Option compilerVar="CC" />
